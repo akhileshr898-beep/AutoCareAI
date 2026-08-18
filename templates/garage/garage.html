@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ vehicle.vehicle_name }} | Smart Garage
+    </title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for(
+              'static',
+              filename='css/garage/garage.css'
+          ) }}">
+</head>
+
+<body>
+
+    {# Prevent Jinja errors if digital-twin data is unavailable #}
+    {% set digital_twin_components = digital_twin_components|default({}, true) %}
+
+    <div class="garage-background"></div>
+
+    <nav class="garage-navbar">
+
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <a href="{{ url_for('dashboard.dashboard') }}"
+               class="garage-brand">
+
+                <span class="brand-icon">
+                    <i class="bi bi-car-front-fill"></i>
+                </span>
+
+                AutoCare AI
+
+            </a>
+
+            <div class="d-flex gap-2">
+
+                <a href="{{ url_for(
+                'service.service_history',
+                vehicle_id=vehicle.id
+            ) }}"
+                   class="btn btn-outline-light">
+
+                    Service History
+
+                </a>
+
+                <a href="{{ url_for('dashboard.dashboard') }}"
+                   class="btn btn-primary">
+
+                    Dashboard
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <main class="container garage-container">
+
+        <section class="garage-header">
+
+            <div>
+
+                <span class="garage-label">
+                    DIGITAL SMART GARAGE
+                </span>
+
+                <h1>
+                    {{ vehicle.vehicle_name }}
+                </h1>
+
+                <p>
+                    {{ vehicle.company }}
+                    {{ vehicle.model }}
+                    ·
+                    {{ vehicle.registration_number }}
+                </p>
+
+            </div>
+
+            <span class="vehicle-type-badge">
+                {{ vehicle.vehicle_type }}
+            </span>
+
+        </section>
+
+        <section class="row g-4">
+
+            <div class="col-lg-7">
+
+                <div class="vehicle-viewer-card">
+
+                    <div class="viewer-grid"></div>
+                    <div class="scanner-line"></div>
+
+                    <div class="vehicle-display">
+
+                        {% if vehicle.vehicle_image %}
+
+                        <img src="{{ url_for(
+                            'static',
+                            filename='uploads/' + vehicle.vehicle_image
+                        ) }}"
+                             alt="{{ vehicle.vehicle_name }}"
+                             id="vehicleImage">
+
+                        {% else %}
+
+                        <div class="vehicle-placeholder">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="digital-twin-hotspots">
+
+                        <button type="button"
+                                class="component-hotspot hotspot-engine"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-engine"
+                                title="Engine">
+
+                            <i class="bi bi-gear-fill"></i>
+                            <span>Engine</span>
+
+                        </button>
+
+                        <button type="button"
+                                class="component-hotspot hotspot-battery"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-battery"
+                                title="Battery">
+
+                            <i class="bi bi-battery-half"></i>
+                            <span>Battery</span>
+
+                        </button>
+
+                        <button type="button"
+                                class="component-hotspot hotspot-front-brake"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-front_brake"
+                                title="Front brake">
+
+                            <i class="bi bi-disc-fill"></i>
+                            <span>Front Brake</span>
+
+                        </button>
+
+                        <button type="button"
+                                class="component-hotspot hotspot-rear-brake"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-rear_brake"
+                                title="Rear brake">
+
+                            <i class="bi bi-disc"></i>
+                            <span>Rear Brake</span>
+
+                        </button>
+
+                        <button type="button"
+                                class="component-hotspot hotspot-front-tyre"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-front_tyre"
+                                title="Front tyre">
+
+                            <i class="bi bi-circle"></i>
+                            <span>Front Tyre</span>
+
+                        </button>
+
+                        <button type="button"
+                                class="component-hotspot hotspot-rear-tyre"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-rear_tyre"
+                                title="Rear tyre">
+
+                            <i class="bi bi-circle-fill"></i>
+                            <span>Rear Tyre</span>
+
+                        </button>
+
+                        {% if digital_twin_components.get('chain') %}
+
+                        <button type="button"
+                                class="component-hotspot hotspot-chain"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-chain"
+                                title="Chain and sprocket">
+
+                            <i class="bi bi-link-45deg"></i>
+                            <span>Chain</span>
+
+                        </button>
+
+                        {% endif %}
+
+                        <button type="button"
+                                class="component-hotspot hotspot-suspension"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-suspension"
+                                title="Suspension">
+
+                            <i class="bi bi-arrows-collapse-vertical"></i>
+                            <span>Suspension</span>
+
+                        </button>
+
+                        <button type="button"
+                                class="component-hotspot hotspot-lights"
+                                data-bs-toggle="modal"
+                                data-bs-target="#componentModal-lights"
+                                title="Lights">
+
+                            <i class="bi bi-lightbulb-fill"></i>
+                            <span>Lights</span>
+
+                        </button>
+
+                    </div>
+
+                    <div class="hologram-platform"></div>
+
+                    <div class="floating-status status-engine">
+
+                        <span class="status-dot green"></span>
+
+                        Engine monitoring
+
+                    </div>
+
+                    <div class="floating-status status-service">
+
+                        <span class="status-dot yellow"></span>
+
+                        {% if prediction.supported %}
+
+                        {% if prediction.is_overdue %}
+                        Service overdue
+                        {% else %}
+                        {{ prediction.remaining_km }} km remaining
+                        {% endif %}
+
+                        {% else %}
+                        Schedule unavailable
+                        {% endif %}
+
+                    </div>
+
+                    <div class="viewer-controls">
+
+                        <button type="button"
+                                id="rotateLeft"
+                                title="Rotate left">
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                        </button>
+
+                        <button type="button"
+                                id="resetVehicle"
+                                title="Reset">
+
+                            <i class="bi bi-aspect-ratio"></i>
+
+                        </button>
+
+                        <button type="button"
+                                id="rotateRight"
+                                title="Rotate right">
+
+                            <i class="bi bi-arrow-clockwise"></i>
+
+                        </button>
+
+                    </div>
+
+                    <p class="viewer-help">
+                        Interactive Digital Twin — click a highlighted
+                        component to view its condition and recommendation.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-5">
+
+                <div class="health-card">
+
+                    <div class="health-heading">
+
+                        <div>
+
+                            <span>Vehicle Health</span>
+
+                            <h2>
+                                Overall condition
+                            </h2>
+
+                        </div>
+
+                        <div class="health-circle"
+                             style="--score: {{ health_score }};">
+
+                            <strong>
+                                {{ health_score }}
+                            </strong>
+
+                            <small>
+                                %
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <div class="health-item">
+
+                        <div class="health-item-heading">
+
+                            <span>
+                                Engine
+                            </span>
+
+                            <strong>
+                                96%
+                            </strong>
+
+                        </div>
+
+                        <div class="health-progress">
+
+                            <span style="width: 96%;"></span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="health-item">
+
+                        <div class="health-item-heading">
+
+                            <span>
+                                Service status
+                            </span>
+
+                            <strong>
+                                {% if prediction.is_overdue %}
+                                55%
+                                {% else %}
+                                90%
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+                        <div class="health-progress">
+
+                            <span style="width:
+                            {% if prediction.is_overdue %}
+                                55%
+                            {% else %}
+                                90%
+                            {% endif %};">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="health-item">
+
+                        <div class="health-item-heading">
+
+                            <span>
+                                Documents
+                            </span>
+
+                            <strong>
+                                80%
+                            </strong>
+
+                        </div>
+
+                        <div class="health-progress">
+
+                            <span style="width: 80%;"></span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="health-message">
+
+                        <i class="bi bi-stars"></i>
+
+                        <div>
+
+                            <strong>
+                                AI vehicle insight
+                            </strong>
+
+                            <p>
+                                Add fuel, insurance and PUC records to receive
+                                a more accurate vehicle-health score.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="garage-stats row g-4">
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+
+                        <i class="bi bi-speedometer2"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Current odometer
+                        </span>
+
+                        <strong>
+                            {{ "{:,}".format(vehicle.odometer) }} km
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon orange">
+
+                        <i class="bi bi-tools"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Next service
+                        </span>
+
+                        <strong>
+
+                            {% if prediction.supported %}
+
+                            {% if prediction.is_overdue %}
+                            Overdue
+                            {% else %}
+                            {{ prediction.service_km }} km
+                            {% endif %}
+
+                            {% else %}
+                            Unavailable
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+
+                        <i class="bi bi-receipt"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Service records
+                        </span>
+
+                        <strong>
+                            {{ service_count }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon purple">
+
+                        <i class="bi bi-currency-rupee"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Maintenance cost
+                        </span>
+
+                        <strong>
+                            ₹{{ "%.2f"|format(total_cost) }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="row g-4 garage-bottom-section">
+
+            <div class="col-lg-7">
+
+                <div class="timeline-card">
+
+                    <div class="section-title">
+
+                        <div>
+
+                            <span>
+                                SERVICE BOOK
+                            </span>
+
+                            <h2>
+                                Recent maintenance
+                            </h2>
+
+                        </div>
+
+                        <a href="{{ url_for(
+                        'service.add_service',
+                        vehicle_id=vehicle.id
+                    ) }}"
+                           class="btn btn-primary">
+
+                            <i class="bi bi-plus-lg"></i>
+
+                            Add Service
+
+                        </a>
+
+                    </div>
+
+                    {% if service_records %}
+
+                    <div class="service-timeline">
+
+                        {% for record in service_records[:5] %}
+
+                        <div class="timeline-item">
+
+                            <div class="timeline-dot"></div>
+
+                            <div class="timeline-content">
+
+                                <div class="d-flex justify-content-between gap-3">
+
+                                    <div>
+
+                                        <h3>
+                                            {{ record.service_type }}
+                                        </h3>
+
+                                        <p>
+                                            {{ record.service_date.strftime('%d %b %Y') }}
+                                            ·
+                                            {{ record.odometer }} km
+                                        </p>
+
+                                    </div>
+
+                                    <strong>
+                                        ₹{{ "%.2f"|format(record.total_cost) }}
+                                    </strong>
+
+                                </div>
+
+                                {% if record.work_done %}
+
+                                <small>
+                                    {{ record.work_done }}
+                                </small>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="empty-service">
+
+                        <i class="bi bi-tools"></i>
+
+                        <h3>
+                            No service history yet
+                        </h3>
+
+                        <p>
+                            Add your first service record to build the
+                            vehicle’s digital service book.
+                        </p>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-5">
+
+                <div class="quick-actions-card">
+
+                    <div class="section-title">
+
+                        <div>
+
+                            <span>
+                                SMART TOOLS
+                            </span>
+
+                            <h2>
+                                Quick actions
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    <div class="quick-actions">
+
+                        <a href="{{ url_for(
+                        'service.add_service',
+                        vehicle_id=vehicle.id
+                    ) }}">
+
+                            <i class="bi bi-tools"></i>
+
+                            <span>
+                                Add service
+                            </span>
+
+                        </a>
+
+                        <a href="{{ url_for(
+                        'service.service_history',
+                        vehicle_id=vehicle.id
+                    ) }}">
+
+                            <i class="bi bi-clock-history"></i>
+
+                            <span>
+                                Service history
+                            </span>
+
+                        </a>
+
+                        <a href="{{ url_for('fuel.add_fuel', vehicle_id=vehicle.id) }}">
+
+                            <i class="bi bi-fuel-pump"></i>
+
+                            <span>
+                                Fuel tracker
+                            </span>
+
+                        </a>
+
+                        <a href="{{ url_for('garage.insurance_puc', vehicle_id=vehicle.id) }}">
+
+                            <i class="bi bi-file-earmark-check"></i>
+
+                            <span>
+                                Insurance & PUC
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                    <div class="ai-question-card">
+
+                        <div class="ai-icon">
+
+                            <i class="bi bi-stars"></i>
+
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <strong>
+                                AutoCare AI Vehicle Insight
+                            </strong>
+
+                            <p id="aiInsightPreview">
+                                Analyse service, fuel, documents and vehicle-health data.
+                            </p>
+
+                        </div>
+
+                        <button type="button"
+                                id="askAiButton"
+                                data-vehicle-id="{{ vehicle.id }}"
+                                title="Generate vehicle insight"
+                                aria-label="Generate vehicle insight">
+
+                            <i class="bi bi-stars"></i>
+
+                        </button>
+
+                    </div>
+
+                    <div id="aiInsightResult"
+                         class="mt-3"
+                         style="display: none;">
+
+                        <div class="card bg-dark border-secondary text-light">
+
+                            <div class="card-body">
+
+                                <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+
+                                    <div>
+
+                                        <span class="garage-label">
+                                            AUTOCARE AI ANALYSIS
+                                        </span>
+
+                                        <h5 class="mb-0 mt-1">
+                                            Vehicle insight
+                                        </h5>
+
+                                    </div>
+
+                                    <span id="aiHealthBadge"
+                                          class="badge text-bg-primary">
+                                        --
+                                    </span>
+
+                                </div>
+
+                                <p id="aiInsightSummary"
+                                   class="mb-3">
+                                </p>
+
+                                <div id="aiInsightContent">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        {% for component_key, component in digital_twin_components.items() %}
+
+        <div class="modal fade"
+             id="componentModal-{{ component_key }}"
+             tabindex="-1"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content component-modal">
+
+                    <div class="modal-header">
+
+                        <div>
+
+                            <span class="garage-label">
+                                DIGITAL TWIN COMPONENT
+                            </span>
+
+                            <h4 class="modal-title">
+                                {{ component.label }}
+                            </h4>
+
+                        </div>
+
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="component-modal-score">
+
+                            <div class="component-health-ring"
+                                 style="--component-health: {{ component.health }};">
+
+                                <strong>
+                                    {{ component.health }}
+                                </strong>
+
+                                <small>%</small>
+
+                            </div>
+
+                            <div>
+
+                                <span class="component-status status-{{ component.level }}">
+                                    {{ component.status }}
+                                </span>
+
+                                <p>
+                                    {{ component.recommendation }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="component-detail-grid">
+
+                            <div>
+
+                                <span>Used distance</span>
+
+                                <strong>
+                                    {{ component.used_km }} km
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Estimated remaining</span>
+
+                                <strong>
+                                    {{ component.remaining_km }} km
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Expected life</span>
+
+                                <strong>
+                                    {{ component.expected_life_km }} km
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Last recorded action</span>
+
+                                <strong>
+                                    {{ component.last_action }}
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Last recorded odometer</span>
+
+                                <strong>
+                                    {{ component.last_service_km }} km
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Next inspection</span>
+
+                                <strong>
+
+                                    {% if component.next_inspection_km %}
+
+                                    {{ component.next_inspection_km }} km
+
+                                    {% else %}
+
+                                    Based on condition
+
+                                    {% endif %}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        {% if component.last_service_date %}
+
+                        <p class="component-record-date">
+
+                            Last component record:
+                            {{ component.last_service_date.strftime('%d %b %Y') }}
+
+                        </p>
+
+                        {% endif %}
+
+                        <div class="component-disclaimer">
+
+                            <i class="bi bi-info-circle"></i>
+
+                            This is an estimated maintenance indicator
+                            based on odometer and saved records. Confirm
+                            actual condition through physical inspection.
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <a href="{{ url_for(
+                                'service.add_service',
+                                vehicle_id=vehicle.id
+                            ) }}"
+                           class="btn btn-primary">
+
+                            Add Service Record
+
+                        </a>
+
+                        <button type="button"
+                                class="btn btn-outline-light"
+                                data-bs-dismiss="modal">
+
+                            Close
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="{{ url_for(
+    'static',
+    filename='js/garage/garage.js'
+) }}">
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const askAiButton = document.getElementById("askAiButton");
+            const aiInsightResult = document.getElementById("aiInsightResult");
+            const aiInsightPreview = document.getElementById("aiInsightPreview");
+            const aiInsightSummary = document.getElementById("aiInsightSummary");
+            const aiInsightContent = document.getElementById("aiInsightContent");
+            const aiHealthBadge = document.getElementById("aiHealthBadge");
+
+            if (!askAiButton) {
+                return;
+            }
+
+            askAiButton.addEventListener("click", async function () {
+                const vehicleId = askAiButton.dataset.vehicleId;
+
+                const originalButtonHtml = askAiButton.innerHTML;
+
+                askAiButton.disabled = true;
+                askAiButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+
+                aiInsightPreview.textContent = "Analysing your saved vehicle data...";
+
+                try {
+                    const response = await fetch(
+                        `/api/vehicle-insight/${vehicleId}`,
+                        {
+                            method: "GET",
+                            headers: {
+                                "Accept": "application/json"
+                            },
+                            credentials: "same-origin"
+                        }
+                    );
+
+                    let data;
+
+                    try {
+                        data = await response.json();
+                    } catch (jsonError) {
+                        throw new Error(
+                            "The server returned an invalid response."
+                        );
+                    }
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(
+                            data.message || "Unable to generate vehicle insight."
+                        );
+                    }
+
+                    aiInsightResult.style.display = "block";
+
+                    aiInsightSummary.textContent =
+                        data.summary || "Vehicle analysis completed.";
+
+                    aiInsightContent.innerHTML = "";
+
+                    const insightList = document.createElement("ul");
+                    insightList.className = "mb-0 ps-3";
+
+                    const insights = Array.isArray(data.insights)
+                        ? data.insights
+                        : [];
+
+                    if (insights.length === 0) {
+                        const emptyItem = document.createElement("li");
+                        emptyItem.textContent =
+                            "Add more service, fuel and document records for deeper insights.";
+                        insightList.appendChild(emptyItem);
+                    } else {
+                        insights.forEach(function (insight) {
+                            const item = document.createElement("li");
+                            item.className = "mb-2";
+                            item.textContent = insight;
+                            insightList.appendChild(item);
+                        });
+                    }
+
+                    aiInsightContent.appendChild(insightList);
+
+                    aiHealthBadge.textContent =
+                        `${data.health_score ?? "--"}% health`;
+
+                    aiHealthBadge.classList.remove(
+                        "text-bg-primary",
+                        "text-bg-success",
+                        "text-bg-warning",
+                        "text-bg-danger"
+                    );
+
+                    if (data.level === "good") {
+                        aiHealthBadge.classList.add("text-bg-success");
+                    } else if (data.level === "warning") {
+                        aiHealthBadge.classList.add("text-bg-warning");
+                    } else if (data.level === "danger") {
+                        aiHealthBadge.classList.add("text-bg-danger");
+                    } else {
+                        aiHealthBadge.classList.add("text-bg-primary");
+                    }
+
+                    aiInsightPreview.textContent =
+                        "Analysis complete — click again to refresh.";
+
+                    aiInsightResult.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest"
+                    });
+
+                } catch (error) {
+                    aiInsightResult.style.display = "block";
+
+                    aiInsightSummary.textContent =
+                        "AutoCare AI could not complete the analysis.";
+
+                    aiInsightContent.innerHTML = "";
+
+                    const errorMessage = document.createElement("div");
+                    errorMessage.className = "text-danger";
+                    errorMessage.textContent =
+                        error.message || "Unknown error.";
+
+                    aiInsightContent.appendChild(errorMessage);
+
+                    aiHealthBadge.textContent = "Error";
+                    aiHealthBadge.className = "badge text-bg-danger";
+
+                    aiInsightPreview.textContent =
+                        "Unable to analyse vehicle data.";
+
+                } finally {
+                    askAiButton.disabled = false;
+                    askAiButton.innerHTML = originalButtonHtml;
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

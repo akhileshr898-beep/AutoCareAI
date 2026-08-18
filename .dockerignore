@@ -1,0 +1,17 @@
+.git
+.github
+.vscode
+.idea
+__pycache__
+*.py[cod]
+*.log
+.env
+.env.*
+.venv
+venv
+env
+instance
+.pytest_cache
+.mypy_cache
+.DS_Store
+Thumbs.db

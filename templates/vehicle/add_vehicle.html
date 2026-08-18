@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Vehicle | AutoCare AI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 10%, #dbeafe, transparent 35%), #f8fafc;
+        }
+
+        .vehicle-form-card {
+            max-width: 900px;
+            margin: auto;
+            overflow: hidden;
+            border-radius: 26px;
+        }
+
+        .catalogue-panel {
+            padding: 20px;
+            border: 1px solid #bfdbfe;
+            border-radius: 18px;
+            background: #eff6ff;
+        }
+
+        .catalogue-status {
+            min-height: 24px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .selected-vehicle-card {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            border: 1px solid #bbf7d0;
+            border-radius: 16px;
+            background: #f0fdf4;
+        }
+
+            .selected-vehicle-card.show {
+                display: block;
+            }
+
+        .selected-vehicle-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            color: #047857;
+            border-radius: 14px;
+            background: #d1fae5;
+            font-size: 22px;
+        }
+
+        .manual-entry-panel {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #ffffff;
+        }
+
+            .manual-entry-panel.show {
+                display: block;
+            }
+
+        .catalogue-disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .required-note {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .lookup-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+            .lookup-heading i {
+                display: grid;
+                width: 38px;
+                height: 38px;
+                place-items: center;
+                color: #4f46e5;
+                border-radius: 12px;
+                background: #e0e7ff;
+                font-size: 18px;
+            }
+
+        .detail-section-title {
+            margin-top: 10px;
+            padding-bottom: 8px;
+            color: #334155;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+        }
+
+
+        .auto-fetch-hint {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .document-scan-dropzone {
+            padding: 18px;
+            border: 2px dashed #86efac;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .document-scan-status {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+            .document-scan-status.show {
+                display: block;
+            }
+
+            .document-scan-status.loading {
+                color: #1e3a8a;
+                background: #dbeafe;
+            }
+
+            .document-scan-status.success {
+                color: #166534;
+                background: #dcfce7;
+            }
+
+            .document-scan-status.warning {
+                color: #92400e;
+                background: #fef3c7;
+            }
+
+            .document-scan-status.error {
+                color: #b91c1c;
+                background: #fee2e2;
+            }
+
+        .document-file-list {
+            margin-top: 12px;
+            color: #475569;
+            font-size: 13px;
+        }
+
+            .document-file-list .file-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 5px;
+            }
+
+        .document-scan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            color: #166534;
+            background: #dcfce7;
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark bg-dark shadow-sm">
+
+        <div class="container">
+
+            <a class="navbar-brand fw-bold"
+               href="{{ url_for('dashboard.dashboard') }}">
+
+                🚗 AutoCare AI
+
+            </a>
+
+            <a href="{{ url_for('dashboard.dashboard') }}"
+               class="btn btn-outline-light">
+
+                Dashboard
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <main class="container py-5">
+
+        <div class="card border-0 shadow vehicle-form-card">
+
+            <div class="card-body p-4 p-md-5">
+
+                <h2 class="fw-bold mb-1">
+                    Add Your Vehicle
+                </h2>
+
+                <p class="text-muted mb-4">
+                    Upload your RC/insurance/PUC, select from the catalogue, or enter the vehicle manually.
+                </p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% for category, message in messages %}
+
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+
+                {% endfor %}
+
+                {% endwith %}
+
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      id="vehicleForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Hidden fields sent to Flask -->
+                    <input type="hidden"
+                           name="vehicle_name"
+                           id="vehicleName">
+
+                    <input type="hidden"
+                           name="company"
+                           id="company">
+
+                    <input type="hidden"
+                           name="model"
+                           id="model">
+
+                    <input type="hidden"
+                           name="vehicle_type"
+                           id="vehicleType">
+
+                    <input type="hidden"
+                           name="fuel_type"
+                           id="fuelType">
+
+
+                    <section class="document-scan-panel"
+                             id="documentScanPanel">
+
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+                            <div class="lookup-heading mb-0">
+
+                                <i class="bi bi-file-earmark-text"></i>
+
+                                <div>
+                                    <h5 class="fw-bold mb-0">
+                                        Scan RC / Insurance / PUC
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Upload a document photo or PDF and AutoCare AI will extract available details and fill this form.
+                                    </small>
+                                </div>
+
+                            </div>
+
+                            <span class="document-scan-badge">
+                                <i class="bi bi-shield-lock"></i>
+                                Local extraction
+                            </span>
+
+                        </div>
+
+                        <div class="document-scan-dropzone mt-3">
+
+                            <label class="form-label fw-semibold"
+                                   for="vehicleDocumentFiles">
+                                Choose RC, insurance or PUC documents
+                            </label>
+
+                            <input type="file"
+                                   id="vehicleDocumentFiles"
+                                   class="form-control"
+                                   accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
+                                   multiple>
+
+                            <div class="form-text">
+                                Up to 3 files. PDF, PNG, JPG, JPEG or WEBP. For image files, local Tesseract OCR is used.
+                            </div>
+
+                            <div class="document-file-list"
+                                 id="documentFileList"></div>
+
+                            <button type="button"
+                                    class="btn btn-success mt-3"
+                                    id="extractDocumentButton">
+
+                                <i class="bi bi-stars me-2"></i>
+                                Extract & Auto-fill
+
+                            </button>
+
+                        </div>
+
+                        <div class="document-scan-status"
+                             id="documentScanStatus"></div>
+
+                        <div class="small text-muted mt-3">
+                            AutoCare AI extracts only vehicle, insurance and PUC fields needed by this form. Document scanning does not verify the information with a government or insurer database, so review all values before saving.
+                        </div>
+
+                    </section>
+
+                    <section class="catalogue-panel"
+                             id="cataloguePanel">
+
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+                                    Online Vehicle Catalogue
+                                </h5>
+
+                                <p class="text-muted small mb-0">
+                                    Select type, year, manufacturer and model.
+                                </p>
+
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm"
+                                    id="manualModeButton">
+
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Enter manually
+
+                            </button>
+
+                        </div>
+
+                        <div class="row g-3 mt-1">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Vehicle Type *
+                                </label>
+
+                                <select id="catalogueVehicleType"
+                                        class="form-select">
+
+                                    <option value="Car">
+                                        Car
+                                    </option>
+
+                                    <option value="Bike">
+                                        Motorcycle / Bike
+                                    </option>
+
+                                    <option value="Scooter">
+                                        Scooter
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Model Year *
+                                </label>
+
+                                <select id="catalogueYear"
+                                        class="form-select"></select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Manufacturer *
+                                </label>
+
+                                <select id="catalogueMake"
+                                        class="form-select">
+
+                                    <option value="">
+                                        Loading manufacturers...
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-8">
+
+                                <label class="form-label">
+                                    Model *
+                                </label>
+
+                                <select id="catalogueModel"
+                                        class="form-select"
+                                        disabled>
+
+                                    <option value="">
+                                        Select manufacturer first
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Fuel Type *
+                                </label>
+
+                                <select id="catalogueFuelType"
+                                        class="form-select">
+
+                                    <option value="Petrol">
+                                        Petrol
+                                    </option>
+
+                                    <option value="Diesel">
+                                        Diesel
+                                    </option>
+
+                                    <option value="Electric">
+                                        Electric
+                                    </option>
+
+                                    <option value="Hybrid">
+                                        Hybrid
+                                    </option>
+
+                                    <option value="CNG">
+                                        CNG
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <button type="button"
+                                        class="btn btn-primary w-100"
+                                        id="applyCatalogueButton"
+                                        disabled>
+
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Use Selected Vehicle
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div class="catalogue-status mt-3"
+                             id="catalogueStatus"></div>
+
+                        <div class="selected-vehicle-card"
+                             id="selectedVehicleCard">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="selected-vehicle-icon">
+
+                                    <i class="bi bi-car-front-fill"></i>
+
+                                </div>
+
+                                <div class="flex-grow-1">
+
+                                    <small class="text-success fw-semibold">
+                                        VEHICLE SELECTED
+                                    </small>
+
+                                    <h5 class="fw-bold mb-1"
+                                        id="selectedVehicleTitle"></h5>
+
+                                    <p class="text-muted mb-0"
+                                       id="selectedVehicleMeta"></p>
+
+                                </div>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        id="changeVehicleButton">
+
+                                    Change
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-8">
+
+                                <label class="form-label">
+                                    Optional VIN
+                                </label>
+
+                                <input type="text"
+                                       id="vinInput"
+                                       class="form-control text-uppercase"
+                                       maxlength="17"
+                                       placeholder="Enter VIN for available specifications">
+
+                            </div>
+
+                            <div class="col-md-4 d-flex align-items-end">
+
+                                <button type="button"
+                                        id="decodeVinButton"
+                                        class="btn btn-outline-dark w-100">
+
+                                    Decode VIN
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <section class="manual-entry-panel"
+                             id="manualEntryPanel">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+                                    Manual Vehicle Entry
+                                </h5>
+
+                                <p class="text-muted small mb-0">
+                                    Use this only when your vehicle is not listed.
+                                </p>
+
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    id="catalogueModeButton">
+
+                                Back to catalogue
+
+                            </button>
+
+                        </div>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Vehicle Name *
+                                </label>
+
+                                <input type="text"
+                                       id="manualVehicleName"
+                                       class="form-control"
+                                       placeholder="Hunter 350">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Company *
+                                </label>
+
+                                <input type="text"
+                                       id="manualCompany"
+                                       class="form-control"
+                                       placeholder="Royal Enfield">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Model *
+                                </label>
+
+                                <input type="text"
+                                       id="manualModel"
+                                       class="form-control"
+                                       placeholder="Hunter 350">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Vehicle Type *
+                                </label>
+
+                                <select id="manualVehicleType"
+                                        class="form-select">
+
+                                    <option value="">
+                                        Select type
+                                    </option>
+
+                                    <option value="Bike">
+                                        Bike
+                                    </option>
+
+                                    <option value="Scooter">
+                                        Scooter
+                                    </option>
+
+                                    <option value="Car">
+                                        Car
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Fuel Type *
+                                </label>
+
+                                <select id="manualFuelType"
+                                        class="form-select">
+
+                                    <option value="">
+                                        Select fuel
+                                    </option>
+
+                                    <option value="Petrol">
+                                        Petrol
+                                    </option>
+
+                                    <option value="Diesel">
+                                        Diesel
+                                    </option>
+
+                                    <option value="Electric">
+                                        Electric
+                                    </option>
+
+                                    <option value="Hybrid">
+                                        Hybrid
+                                    </option>
+
+                                    <option value="CNG">
+                                        CNG
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-6 d-flex align-items-end">
+
+                                <button type="button"
+                                        class="btn btn-primary w-100"
+                                        id="applyManualButton">
+
+                                    Use Manual Details
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <section class="mt-4">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold"
+                                       for="registrationNumber">
+                                    Registration / Number Plate *
+                                </label>
+
+                                <input type="text"
+                                       name="registration_number"
+                                       id="registrationNumber"
+                                       class="form-control text-uppercase"
+                                       maxlength="20"
+                                       autocomplete="off"
+                                       placeholder="e.g. KA19HG1639"
+                                       required>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Purchase Date
+                                </label>
+
+                                <input type="date"
+                                       name="purchase_date"
+                                       class="form-control">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Current Odometer
+                                </label>
+
+                                <div class="input-group">
+
+                                    <input type="number"
+                                           name="odometer"
+                                           class="form-control"
+                                           min="0"
+                                           value="0">
+
+                                    <span class="input-group-text">
+                                        km
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Vehicle Photo
+                                </label>
+
+                                <input type="file"
+                                       name="vehicle_image"
+                                       class="form-control"
+                                       accept=".png,.jpg,.jpeg,.webp">
+
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Variant</label>
+                                <input type="text" name="variant" id="variant" class="form-control" placeholder="e.g. VXI, ZXI">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Transmission</label>
+                                <select name="transmission" id="transmission" class="form-select">
+                                    <option value="Manual">Manual</option>
+                                    <option value="Automatic">Automatic</option>
+                                    <option value="CVT">CVT</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Manufacturing Year</label>
+                                <input type="number" name="manufacturing_year" id="manufacturingYear" class="form-control" min="1950" max="2050">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Last Service Date</label>
+                                <input type="date" name="last_service_date" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Last Service Odometer</label>
+                                <div class="input-group">
+                                    <input type="number" name="last_service_odometer" class="form-control" min="0">
+                                    <span class="input-group-text">km</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Avg Daily KM</label>
+                                <div class="input-group">
+                                    <input type="number" name="avg_daily_km" class="form-control" min="0" value="30">
+                                    <span class="input-group-text">km</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Service Interval</label>
+                                <div class="input-group">
+                                    <input type="number" name="service_interval_km" class="form-control" min="100" value="5000">
+                                    <span class="input-group-text">km</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Service Interval (Months)</label>
+                                <div class="input-group">
+                                    <input type="number" name="service_interval_months" class="form-control" min="1" value="6">
+                                    <span class="input-group-text">months</span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="detail-section-title">
+                                    <i class="bi bi-shield-check me-2"></i>
+                                    Insurance Details
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    Insurance Provider
+                                </label>
+                                <input type="text"
+                                       name="insurance_provider"
+                                       id="insuranceProvider"
+                                       class="form-control"
+                                       placeholder="Insurance company">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    Insurance Policy Number
+                                </label>
+                                <input type="text"
+                                       name="insurance_policy_number"
+                                       id="insurancePolicyNumber"
+                                       class="form-control text-uppercase"
+                                       placeholder="Auto-filled when available">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    Insurance Start Date
+                                </label>
+                                <input type="date"
+                                       name="insurance_start_date"
+                                       id="insuranceStartDate"
+                                       class="form-control">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    Insurance Expiry
+                                </label>
+                                <input type="date"
+                                       name="insurance_expiry"
+                                       id="insuranceExpiry"
+                                       class="form-control">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    Insurance Premium
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number"
+                                           step="0.01"
+                                           min="0"
+                                           name="insurance_premium"
+                                           id="insurancePremium"
+                                           class="form-control"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="detail-section-title">
+                                    <i class="bi bi-cloud-check me-2"></i>
+                                    PUC Details
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    PUC Certificate Number
+                                </label>
+                                <input type="text"
+                                       name="puc_certificate_number"
+                                       id="pucCertificateNumber"
+                                       class="form-control text-uppercase"
+                                       placeholder="Auto-filled when available">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    PUC Issue Date
+                                </label>
+                                <input type="date"
+                                       name="puc_issue_date"
+                                       id="pucIssueDate"
+                                       class="form-control">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    PUC Expiry
+                                </label>
+                                <input type="date"
+                                       name="puc_expiry"
+                                       id="pucExpiry"
+                                       class="form-control">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Nickname</label>
+                                <input type="text" name="nickname" class="form-control" placeholder="e.g. My Daily Ride">
+                            </div>
+
+                            <div class="col-12">
+
+                                <p class="required-note mb-2">
+
+                                    Select a catalogue vehicle or complete manual entry
+                                    before saving.
+
+                                </p>
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg w-100"
+                                        id="saveVehicleButton"
+                                        disabled>
+
+                                    Save Vehicle
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const cataloguePanel =
+            document.getElementById("cataloguePanel");
+
+        const manualEntryPanel =
+            document.getElementById("manualEntryPanel");
+
+        const catalogueVehicleType =
+            document.getElementById("catalogueVehicleType");
+
+        const catalogueYear =
+            document.getElementById("catalogueYear");
+
+        const catalogueMake =
+            document.getElementById("catalogueMake");
+
+        const catalogueModel =
+            document.getElementById("catalogueModel");
+
+        const catalogueFuelType =
+            document.getElementById("catalogueFuelType");
+
+        const applyCatalogueButton =
+            document.getElementById("applyCatalogueButton");
+
+        const catalogueStatus =
+            document.getElementById("catalogueStatus");
+
+        const selectedVehicleCard =
+            document.getElementById("selectedVehicleCard");
+
+        const selectedVehicleTitle =
+            document.getElementById("selectedVehicleTitle");
+
+        const selectedVehicleMeta =
+            document.getElementById("selectedVehicleMeta");
+
+        const saveVehicleButton =
+            document.getElementById("saveVehicleButton");
+
+        const vehicleName =
+            document.getElementById("vehicleName");
+
+        const company =
+            document.getElementById("company");
+
+        const model =
+            document.getElementById("model");
+
+        const vehicleType =
+            document.getElementById("vehicleType");
+
+        const fuelType =
+            document.getElementById("fuelType");
+
+        const csrfToken =
+            document.querySelector(
+                'input[name="csrf_token"]'
+            );
+
+        const registrationNumber =
+            document.getElementById(
+                "registrationNumber"
+            );
+
+        const variantInput =
+            document.getElementById(
+                "variant"
+            );
+
+        const transmissionInput =
+            document.getElementById(
+                "transmission"
+            );
+
+        const manufacturingYearInput =
+            document.getElementById(
+                "manufacturingYear"
+            );
+
+        const insuranceProviderInput =
+            document.getElementById(
+                "insuranceProvider"
+            );

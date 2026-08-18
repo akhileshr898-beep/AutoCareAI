@@ -1,0 +1,487 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Fuel Analytics | AutoCare AI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --surface: rgba(12, 27, 47, 0.88);
+            --border: rgba(148, 163, 184, 0.17);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text);
+            background: radial-gradient(circle at 15% 10%, #12315d, transparent 35%), radial-gradient(circle at 90% 20%, #271f5e, transparent 30%), linear-gradient(135deg, #040b14, #071728);
+        }
+
+        .analytics-card,
+        .chart-card,
+        .insight-card {
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            background: var(--surface);
+            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.25);
+        }
+
+        .analytics-card {
+            height: 100%;
+            padding: 22px;
+        }
+
+            .analytics-card span {
+                color: var(--muted);
+                font-size: 12px;
+            }
+
+            .analytics-card strong {
+                display: block;
+                margin-top: 6px;
+                font-size: 27px;
+            }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            border-radius: 14px;
+            font-size: 20px;
+        }
+
+            .metric-icon.blue {
+                color: #93c5fd;
+                background: rgba(37, 99, 235, 0.15);
+            }
+
+            .metric-icon.green {
+                color: #6ee7b7;
+                background: rgba(16, 185, 129, 0.15);
+            }
+
+            .metric-icon.orange {
+                color: #fdba74;
+                background: rgba(249, 115, 22, 0.15);
+            }
+
+            .metric-icon.purple {
+                color: #c4b5fd;
+                background: rgba(139, 92, 246, 0.15);
+            }
+
+        .chart-card,
+        .insight-card {
+            height: 100%;
+            padding: 24px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            min-height: 310px;
+        }
+
+        .insight-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .insight-row:last-child {
+                border-bottom: 0;
+            }
+
+            .insight-row span {
+                color: var(--muted);
+            }
+
+        .ai-note {
+            padding: 18px;
+            border: 1px solid rgba(139, 92, 246, 0.22);
+            border-radius: 17px;
+            background: rgba(124, 58, 237, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark border-bottom border-secondary">
+        <div class="container">
+            <a class="navbar-brand fw-bold"
+               href="{{ url_for('dashboard.dashboard') }}">
+                🚗 AutoCare AI
+            </a>
+
+            <div class="d-flex gap-2">
+                <a href="{{ url_for(
+                'fuel.fuel_history',
+                vehicle_id=vehicle.id
+            ) }}"
+                   class="btn btn-outline-light">
+                    Fuel History
+                </a>
+
+                <a href="{{ url_for(
+                'fuel.add_fuel',
+                vehicle_id=vehicle.id
+            ) }}"
+                   class="btn btn-primary">
+                    + Add Fuel
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+
+        <div class="mb-4">
+            <span class="text-info fw-semibold">
+                FUEL ANALYTICS
+            </span>
+
+            <h1 class="fw-bold mt-2">
+                Fuel Performance Dashboard
+            </h1>
+
+            <p class="text-secondary">
+                {{ vehicle.vehicle_name }}
+                ·
+                {{ vehicle.registration_number }}
+            </p>
+        </div>
+
+        <section class="row g-3 mb-4">
+
+            <div class="col-md-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="metric-icon blue">
+                        <i class="bi bi-fuel-pump-fill"></i>
+                    </div>
+
+                    <span>Total Fuel Used</span>
+
+                    <strong>
+                        {{ "%.2f"|format(statistics.total_litres) }} L
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="metric-icon green">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+
+                    <span>Total Fuel Cost</span>
+
+                    <strong>
+                        ₹{{ "%.2f"|format(statistics.total_amount) }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="metric-icon orange">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+
+                    <span>Average Mileage</span>
+
+                    <strong>
+                        {% if statistics.average_mileage > 0 %}
+                        {{ "%.2f"|format(statistics.average_mileage) }}
+                        km/L
+                        {% else %}
+                        Not enough data
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="metric-icon purple">
+                        <i class="bi bi-signpost-split"></i>
+                    </div>
+
+                    <span>Total Distance</span>
+
+                    <strong>
+                        {{ total_distance }} km
+                    </strong>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="row g-4 mb-4">
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h3>Monthly Fuel Spending</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h3>Mileage Trend</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="mileageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h3>Fuel Quantity Per Refill</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="refillChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h3>Monthly Fuel Quantity</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="monthlyLitresChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="row g-4">
+
+            <div class="col-lg-7">
+                <div class="insight-card">
+                    <h3>Detailed Statistics</h3>
+
+                    <div class="insight-row">
+                        <span>Cost per kilometre</span>
+                        <strong>
+                            {% if cost_per_km > 0 %}
+                            ₹{{ "%.2f"|format(cost_per_km) }}/km
+                            {% else %}
+                            Not enough data
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div class="insight-row">
+                        <span>Best mileage</span>
+                        <strong>
+                            {% if best_mileage > 0 %}
+                            {{ "%.2f"|format(best_mileage) }} km/L
+                            {% else %}
+                            Not enough data
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div class="insight-row">
+                        <span>Highest fuel bill</span>
+                        <strong>₹{{ "%.2f"|format(highest_bill) }}</strong>
+                    </div>
+
+                    <div class="insight-row">
+                        <span>Lowest fuel bill</span>
+                        <strong>₹{{ "%.2f"|format(lowest_bill) }}</strong>
+                    </div>
+
+                    <div class="insight-row">
+                        <span>Cheapest fuel price</span>
+                        <strong>₹{{ "%.2f"|format(cheapest_price) }}/L</strong>
+                    </div>
+
+                    <div class="insight-row">
+                        <span>Highest fuel price</span>
+                        <strong>₹{{ "%.2f"|format(highest_price) }}/L</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="insight-card">
+                    <h3>Smart Insight</h3>
+
+                    <div class="ai-note">
+                        {% if statistics.average_mileage > 0 %}
+                        <strong>
+                            Current average:
+                            {{ "%.2f"|format(statistics.average_mileage) }}
+                            km/L
+                        </strong>
+
+                        <p class="text-secondary mt-2 mb-0">
+                            Add fuel entries regularly at different
+                            odometer readings to improve accuracy.
+                        </p>
+                        {% else %}
+                        <strong>
+                            More driving data is required.
+                        </strong>
+
+                        <p class="text-secondary mt-2 mb-0">
+                            Add another refill after travelling some
+                            distance to calculate mileage and cost per km.
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    {% if recent_record %}
+                    <div class="mt-4">
+                        <span class="text-secondary">
+                            Latest refill
+                        </span>
+
+                        <h4 class="mt-2">
+                            {{ recent_record.refill_date.strftime('%d %b %Y') }}
+                        </h4>
+
+                        <p class="text-secondary mb-0">
+                            {{ "%.2f"|format(recent_record.litres) }} L
+                            ·
+                            ₹{{ "%.2f"|format(recent_record.total_amount) }}
+
+                            {% if recent_record.fuel_station %}
+                            · {{ recent_record.fuel_station }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+    Chart.defaults.color = "#cbd5e1";
+    Chart.defaults.borderColor =
+        "rgba(148, 163, 184, 0.12)";
+
+    const chartLabels =
+        {{ chart_labels | tojson }};
+
+    const monthlySpending =
+        {{ monthly_spending | tojson }};
+
+    const monthlyLitres =
+        {{ monthly_litres | tojson }};
+
+    const mileageLabels =
+        {{ mileage_labels | tojson }};
+
+    const mileageValues =
+        {{ mileage_values | tojson }};
+
+    const refillLabels =
+        {{ refill_labels | tojson }};
+
+    const refillLitres =
+        {{ refill_litres | tojson }};
+
+    new Chart(
+        document.getElementById("spendingChart"),
+        {
+            type: "bar",
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: "Spending (₹)",
+                    data: monthlySpending,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+
+    new Chart(
+        document.getElementById("mileageChart"),
+        {
+            type: "line",
+            data: {
+                labels: mileageLabels,
+                datasets: [{
+                    label: "Mileage (km/L)",
+                    data: mileageValues,
+                    tension: 0.35,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+
+    new Chart(
+        document.getElementById("refillChart"),
+        {
+            type: "bar",
+            data: {
+                labels: refillLabels,
+                datasets: [{
+                    label: "Fuel quantity (L)",
+                    data: refillLitres,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+
+    new Chart(
+        document.getElementById("monthlyLitresChart"),
+        {
+            type: "line",
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: "Monthly fuel (L)",
+                    data: monthlyLitres,
+                    tension: 0.35,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+    </script>
+
+</body>
+</html>

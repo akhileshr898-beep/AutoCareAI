@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#07111f">
+
+    <title>Dashboard | AutoCare AI</title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-background"></div>
+    <div class="dashboard-grid"></div>
+    <div class="dashboard-glow glow-one"></div>
+    <div class="dashboard-glow glow-two"></div>
+
+    <nav class="dashboard-navbar">
+
+        <div class="container-fluid dashboard-width">
+
+            <div class="navbar-content">
+
+                <a class="dashboard-brand"
+                   href="{{ url_for('home') }}">
+
+                    <span class="brand-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </span>
+
+                    <span>
+                        AutoCare <strong>AI</strong>
+                    </span>
+
+                </a>
+
+                <div class="navbar-actions">
+
+                    <a href="{{ url_for('home') }}"
+                       class="navbar-link d-none d-md-flex">
+
+                        <i class="bi bi-house"></i>
+                        Home
+
+                    </a>
+
+                    <a href="{{ url_for('vehicle.add_vehicle') }}"
+                       class="navbar-link d-none d-md-flex">
+
+                        <i class="bi bi-plus-circle"></i>
+                        Add Vehicle
+
+                    </a>
+
+                    <div class="notification-menu">
+
+                        <button type="button"
+                                class="notification-button"
+                                id="notificationButton"
+                                aria-label="Open notifications">
+
+                            <i class="bi bi-bell-fill"></i>
+
+                            {% set active_notifications = notifications
+                            | selectattr('level', 'in', ['warning', 'danger'])
+                            | list %}
+
+                            {% if active_notifications %}
+
+                            <span class="notification-count">
+                                {{ active_notifications|length }}
+                            </span>
+
+                            {% endif %}
+
+                        </button>
+
+                        <div class="notification-dropdown"
+                             id="notificationDropdown">
+
+                            <div class="notification-dropdown-header">
+
+                                <div>
+
+                                    <strong>
+                                        AutoCare Alerts
+                                    </strong>
+
+                                    <small>
+                                        Service reminders for your garage
+                                    </small>
+
+                                </div>
+
+                                <i class="bi bi-bell"></i>
+
+                            </div>
+
+                            <div class="notification-list">
+
+                                {% if notifications %}
+
+                                {% for notice in notifications %}
+
+                                <a href="{{ url_for(
+                                        'service.service_history',
+                                        vehicle_id=notice.vehicle_id
+                                    ) }}"
+                                   class="notification-item notification-{{ notice.level }}">
+
+                                    <span class="notification-icon">
+
+                                        {% if notice.level == 'danger' %}
+                                        <i class="bi bi-exclamation-octagon-fill"></i>
+                                        {% elif notice.level == 'warning' %}
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        {% elif notice.level == 'success' %}
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        {% else %}
+                                        <i class="bi bi-info-circle-fill"></i>
+                                        {% endif %}
+
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            {{ notice.vehicle_name }}:
+                                            {{ notice.title }}
+                                        </strong>
+
+                                        <small>
+                                            {{ notice.message }}
+                                        </small>
+
+                                    </span>
+
+                                </a>
+
+                                {% endfor %}
+
+                                {% else %}
+
+                                <div class="notification-empty">
+
+                                    <i class="bi bi-check-circle"></i>
+
+                                    <span>
+                                        No service alerts.
+                                    </span>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="profile-menu">
+
+                        <button type="button"
+                                class="profile-button"
+                                id="profileButton">
+
+                            <span class="profile-avatar">
+
+                                {{ user.full_name[0]|upper }}
+
+                            </span>
+
+                            <span class="profile-name d-none d-sm-block">
+
+                                {{ user.full_name }}
+
+                            </span>
+
+                            <i class="bi bi-chevron-down"></i>
+
+                        </button>
+
+                        <div class="profile-dropdown"
+                             id="profileDropdown">
+
+                            <div class="profile-dropdown-header">
+
+                                <strong>
+                                    {{ user.full_name }}
+                                </strong>
+
+                                <small>
+                                    {{ user.email }}
+                                </small>
+
+                            </div>
+
+                            <a href="{{ url_for('home') }}">
+
+                                <i class="bi bi-house"></i>
+                                Home
+
+                            </a>
+
+                            <a href="{{ url_for('vehicle.add_vehicle') }}">
+
+                                <i class="bi bi-plus-circle"></i>
+                                Add Vehicle
+
+                            </a>
+
+                            <a href="{{ url_for('logout') }}"
+                               class="logout-link">
+
+                                <i class="bi bi-box-arrow-right"></i>
+                                Logout
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <main class="container-fluid dashboard-width dashboard-main">
+
+        {# =========================================================
+        DASHBOARD SAFE DEFAULTS
+        Supports both the older dashboard.py and the corrected one.
+        ========================================================= #}
+
+        {% set stats = stats|default({}, true) %}
+        {% set vehicles = vehicles|default([], true) %}
+
+        {% set total_vehicles =
+        total_vehicles|default(
+        stats.total_vehicles|default(vehicles|length, true),
+        true
+        )
+        %}
+
+        {% set service_due_count =
+        service_due_count|default(
+        (stats.upcoming_services|default(0, true))
+        +
+        (stats.overdue_services|default(0, true)),
+        true
+        )
+        %}
+
+        {% set total_service_cost =
+        total_service_cost|default(
+        stats.total_maintenance_cost|default(0, true),
+        true
+        )
+        %}
+
+        {% set total_fuel_cost =
+        total_fuel_cost|default(
+        stats.total_fuel_cost|default(0, true),
+        true
+        )
+        %}
+
+        {% set total_expenses =
+        total_expenses|default(
+        (total_service_cost|float)
+        +
+        (total_fuel_cost|float),
+        true
+        )
+        %}
+
+        {% set average_health =
+        average_health|default(
+        stats.average_health|default(0, true),
+        true
+        )
+        %}
+
+        {% set chart_labels =
+        chart_labels|default([], true)
+        %}
+
+        {% set chart_service_costs =
+        chart_service_costs|default([], true)
+        %}
+
+        {% set chart_fuel_costs =
+        chart_fuel_costs|default([], true)
+        %}
+
+
+        {# =========================================================
+        CALCULATE AVERAGE HEALTH FROM VEHICLE CARDS
+        This fixes 0% when an older dashboard.py does not pass
+        average_health but vehicle_predictions is available.
+        ========================================================= #}
+
+        {% set health_calc = namespace(total=0, count=0) %}
+
+        {% for item in vehicle_predictions|default([], true) %}
+
+        {% set prediction = item.prediction|default({}, true) %}
+
+        {% if item.health_score is defined
+        and item.health_score is not none %}
+
+        {% set card_health = item.health_score|int %}
+
+        {% elif prediction.supported|default(false)
+        and prediction.is_overdue|default(false) %}
+
+        {% set card_health = 65 %}
+
+        {% elif prediction.supported|default(false) %}
+
+        {% set card_health = 92 %}
+
+        {% else %}
+
+        {% set card_health = 78 %}
+
+        {% endif %}
+
+        {% set health_calc.total =
+        health_calc.total + card_health
+        %}
+
+        {% set health_calc.count =
+        health_calc.count + 1
+        %}
+
+        {% endfor %}
+
+        {% if (average_health|int) <= 0
+        and health_calc.count > 0 %}
+
+        {% set average_health =
+        (health_calc.total / health_calc.count)
+        |round
+        |int
+        %}
+
+        {% endif %}
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% for category, message in messages %}
+
+        <div class="alert alert-{{ category }} dashboard-alert">
+
+            {{ message }}
+
+        </div>
+
+        {% endfor %}
+
+        {% endwith %}
+
+        <section class="welcome-section">
+
+            <div class="welcome-content">
+
+                <span class="section-label">
+                    SMART VEHICLE COMMAND CENTRE
+                </span>
+
+                <h1>
+
+                    Welcome back,
+                    <span>{{ user.full_name }}</span> 👋
+
+                </h1>
+
+                <p>
+
+                    Monitor vehicle health, upcoming services and maintenance
+                    expenses from one intelligent dashboard.
+
+                </p>
+
+            </div>
+
+            <a href="{{ url_for('vehicle.add_vehicle') }}"
+               class="add-vehicle-button">
+
+                <i class="bi bi-plus-lg"></i>
+
+                Add Vehicle
+
+            </a>
+
+        </section>
+
+        <section class="summary-grid">
+
+            <article class="summary-card reveal-card">
+
+                <div class="summary-icon blue">
+
+                    <i class="bi bi-car-front"></i>
+
+                </div>
+
+                <div class="summary-content">
+
+                    <span>
+                        Total Vehicles
+                    </span>
+
+                    <strong>
+                        {{ total_vehicles }}
+                    </strong>
+
+                    <small>
+
+                        Vehicles in your garage
+
+                    </small>
+
+                </div>
+
+            </article>
+
+            <article class="summary-card reveal-card">
+
+                <div class="summary-icon orange">
+
+                    <i class="bi bi-tools"></i>
+
+                </div>
+
+                <div class="summary-content">
+
+                    <span>
+                        Service Alerts
+                    </span>
+
+                    <strong>
+                        {{ service_due_count }}
+                    </strong>
+
+                    <small>
+
+                        Vehicles requiring attention
+
+                    </small>
+
+                </div>
+
+            </article>
+
+            <article class="summary-card reveal-card">
+
+                <div class="summary-icon green">
+
+                    <i class="bi bi-currency-rupee"></i>
+
+                </div>
+
+                <div class="summary-content">
+
+                    <span>
+                        Service Cost
+                    </span>
+
+                    <strong>
+
+                        ₹{{ "%.2f"|format(total_service_cost) }}
+
+                    </strong>
+
+                    <small>
+
+                        Total recorded service spending
+
+                    </small>
+
+                </div>
+
+            </article>
+
+            <article class="summary-card reveal-card">
+
+                <div class="summary-icon purple">
+
+                    <i class="bi bi-heart-pulse"></i>
+
+                </div>
+
+                <div class="summary-content">
+
+                    <span>
+                        Average Health
+                    </span>
+
+                    <strong>
+
+                        {{ average_health }}%
+
+                    </strong>
+
+                    <small>
+
+                        Estimated fleet condition
+
+                    </small>
+
+                </div>
+
+            </article>
+
+        </section>
+
+        {% if vehicles %}
+
+        <section class="dashboard-chart-section mb-4 reveal-card" style="background: rgba(12, 27, 47, 0.88); border-radius: 20px; padding: 20px; border: 1px solid rgba(148, 163, 184, 0.17);">
+            <h3 style="color: white; margin-bottom: 20px;">Service & Fuel Expenses Overview</h3>
+            <canvas id="expensesChart" height="100"></canvas>
+        </section>
+
+        <section class="dashboard-content-grid">
+
+            <div class="vehicle-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            DIGITAL GARAGE
+                        </span>
+
+                        <h2>
+                            Your Vehicles
+                        </h2>
+
+                        <p>
+                            Select a vehicle to view its smart garage.
+                        </p>
+
+                    </div>
+
+                    <span class="vehicle-count">
+
+                        {{ vehicles|length }}
+                        vehicle{% if vehicles|length != 1 %}s{% endif %}
+
+                    </span>
+
+                </div>
+
+                <div class="row g-4">
+
+                    {% for item in vehicle_predictions|default([], true) %}
+
+                    {% set vehicle = item.vehicle %}
+                    {% set prediction = item.prediction %}
+
+                    {# =====================================================
+                    SAFE VEHICLE HEALTH
+                    Works with both old and new dashboard.py versions.
+                    ===================================================== #}
+
+                    {% if item.health_score is defined
+                    and item.health_score is not none %}
+
+                    {% set health_score = item.health_score|int %}
+
+                    {% elif prediction.supported
+                    and prediction.is_overdue %}
+
+                    {% set health_score = 65 %}
+
+                    {% elif prediction.supported %}
+
+                    {% set health_score = 92 %}
+
+                    {% else %}
+
+                    {% set health_score = 78 %}
+
+                    {% endif %}
+
+                    <div class="col-xl-6">
+
+                        <article class="premium-vehicle-card reveal-card">
+
+                            <div class="vehicle-image-area">
+
+                                <div class="image-grid"></div>
+                                <div class="vehicle-scan-line"></div>
+
+                                {% if vehicle.vehicle_image %}
+
+                                <img src="{{ url_for(
+                                            'static',
+                                            filename='uploads/' + vehicle.vehicle_image
+                                        ) }}"
+                                     alt="{{ vehicle.vehicle_name }}"
+                                     class="dashboard-vehicle-image">
+
+                                {% else %}
+
+                                <div class="vehicle-placeholder">
+
+                                    <i class="bi bi-car-front-fill"></i>
+
+                                </div>
+
+                                {% endif %}
+
+                                <span class="vehicle-type">
+
+                                    {{ vehicle.vehicle_type }}
+
+                                </span>
+
+                                <div class="vehicle-health">
+
+                                    <div class="health-circle"
+                                         style="--health: {{ health_score }};">
+
+                                        <strong>
+                                            {{ health_score }}
+                                        </strong>
+
+                                        <small>%</small>
+
+                                    </div>
+
+                                    <span>
+                                        Health
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="vehicle-card-content">
+
+                                <div class="vehicle-title-row">
+
+                                    <div>
+
+                                        <h3>
+                                            {{ vehicle.vehicle_name }}
+                                        </h3>
+
+                                        <p>
+
+                                            {{ vehicle.company }}
+                                            {{ vehicle.model }}
+
+                                        </p>
+
+                                    </div>
+
+                                    <span class="registration-number">
+
+                                        {{ vehicle.registration_number }}
+
+                                    </span>
+
+                                </div>
+
+                                <div class="vehicle-stats-grid">
+
+                                    <div class="vehicle-stat">
+
+                                        <i class="bi bi-speedometer2"></i>
+
+                                        <div>
+
+                                            <span>
+                                                Odometer
+                                            </span>
+
+                                            <strong>
+
+                                                {{ "{:,}".format(vehicle.odometer) }}
+                                                km
+
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="vehicle-stat">
+
+                                        <i class="bi bi-fuel-pump"></i>
+
+                                        <div>
+
+                                            <span>
+                                                Fuel
+                                            </span>
+
+                                            <strong>
+
+                                                {{ vehicle.fuel_type }}
+
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="vehicle-stat">
+
+                                        <i class="bi bi-tools"></i>
+
+                                        <div>
+
+                                            <span>
+                                                Next Service
+                                            </span>
+
+                                            {% if prediction.supported %}
+
+                                            {% if prediction.is_overdue %}
+
+                                            <strong class="danger-text">
+
+                                                Overdue
+
+                                            </strong>
+
+                                            {% else %}
+
+                                            <strong>
+
+                                                {{ prediction.remaining_km }}
+                                                km left
+
+                                            </strong>
+
+                                            {% endif %}
+
+                                            {% else %}
+
+                                            <strong class="warning-text">
+
+                                                Unavailable
+
+                                            </strong>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="vehicle-stat">
+
+                                        <i class="bi bi-currency-rupee"></i>
+
+                                        <div>
+
+                                            <span>
+                                                Service Cost
+                                            </span>
+
+                                            <strong>
+
+                                                ₹{{ "%.2f"|format(item.total_service_cost|default(0, true)) }}
+
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                {% if prediction.supported and not prediction.is_overdue %}
+
+                                <div class="service-progress-box">
+
+                                    <div class="service-progress-heading">
+
+                                        <span>
+
+                                            {{ prediction.service_name }}
+
+                                        </span>
+
+                                        <strong>
+
+                                            Due at
+                                            {{ prediction.service_km }}
+                                            km
+
+                                        </strong>
+
+                                    </div>
+
+                                    {% set progress = (
+                                    vehicle.odometer /
+                                    prediction.service_km *
+                                    100
+                                    ) %}
+
+                                    <div class="service-progress">
+
+                                        <span style="width: {{ [progress, 100]|min }}%;"></span>
+
+                                    </div>
+
+                                    <small>
+
+                                        {% if prediction.service_date %}
+
+                                        {{ prediction.service_date.strftime('%d %b %Y') }}
+                                        or distance limit,
+                                        whichever occurs first
+
+                                        {% else %}
+
+                                        Based on official distance schedule
+
+                                        {% endif %}
+
+                                    </small>
+
+
+
+                                </div>
+
+                                {% elif prediction.supported and prediction.is_overdue %}
+
+                                <div class="service-overdue-message">
+
+                                    <i class="bi bi-exclamation-triangle"></i>
+
+                                    Service is overdue. Schedule maintenance soon.
+
+                                </div>
+
+                                {% else %}
+
+                                <div class="schedule-unavailable-message">
+
+                                    <i class="bi bi-info-circle"></i>
+
+                                    Official schedule is not available for this vehicle yet.
+
+                                </div>
+
+                                {% endif %}
+
+                                <div class="vehicle-actions">
+
+
+                                    <a href="{{ url_for(
+                                            'garage.garage',
+                                            vehicle_id=vehicle.id
+                                        ) }}"
+                                       class="garage-button">
+
+                                        <i class="bi bi-box"></i>
+
+                                        Open Smart Garage
+
+                                    </a>
+
+                                    <a href="{{ url_for(
+                                            'service.add_service',
+                                            vehicle_id=vehicle.id
+                                        ) }}"
+                                       class="action-icon-button"
+                                       title="Add service">
+
+                                        <i class="bi bi-plus-lg"></i>
+
+                                    </a>
+
+                                    <a href="{{ url_for(
+                                            'service.service_history',
+                                            vehicle_id=vehicle.id
+                                        ) }}"
+                                       class="action-icon-button"
+                                       title="Service history">
+
+                                        <i class="bi bi-clock-history"></i>
+
+                                    </a>
+
+                                    <a href="{{ url_for(
+                                            'fuel.add_fuel',
+                                            vehicle_id=vehicle.id
+                                        ) }}"
+                                       class="action-icon-button"
+                                       title="Add fuel">
+
+                                        <i class="bi bi-fuel-pump-fill"></i>
+
+                                    </a>
+
+                                    <a href="{{ url_for(
+                                            'fuel.fuel_history',
+                                            vehicle_id=vehicle.id
+                                        ) }}"
+                                       class="action-icon-button"
+                                       title="Fuel history">
+
+                                        <i class="bi bi-graph-up-arrow"></i>
+
+                                    </a>
+                                    <a href="{{ url_for(
+                                            'fuel.fuel_analytics',
+                                            vehicle_id=vehicle.id
+                                       ) }}"
+                                       class="action-icon-button"
+                                       title="Fuel analytics">
+
+                                        <i class="bi bi-bar-chart-fill"></i>
+
+                                    </a>
+
+                                    <a href="{{ url_for(
+                                            'vehicle.edit_vehicle',
+                                            vehicle_id=vehicle.id
+                                        ) }}"
+                                       class="action-icon-button"
+                                       title="Edit vehicle">
+
+                                        <i class="bi bi-pencil-square"></i>
+
+                                    </a>
+
+                                    <form method="POST"
+                                          action="{{ url_for(
+                                              'vehicle.delete_vehicle',
+                                              vehicle_id=vehicle.id
+                                          ) }}"
+                                          class="vehicle-delete-form"
+                                          onsubmit="return confirm('Delete this vehicle and all related records?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                        <button type="submit"
+                                                class="action-icon-button vehicle-delete-button"
+                                                title="Delete vehicle">
+
+                                            <i class="bi bi-trash"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <aside class="dashboard-sidebar">
+
+                <section class="ai-insight-card reveal-card">
+
+                    <div class="ai-card-header">
+
+                        <div class="ai-icon">
+
+                            <i class="bi bi-stars"></i>
+
+                        </div>
+
+                        <div>
+
+                            <span>
+                                AUTOCARE INTELLIGENCE
+                            </span>
+
+                            <h3>
+                                AI Insights
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    {% if service_due_count > 0 %}
+
+                    <div class="ai-message warning-message">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                        <div>
+
+                            <strong>
+                                Service attention required
+                            </strong>
+
+                            <p>
+
+                                {{ service_due_count }}
+                                vehicle{% if service_due_count != 1 %}s{% endif %}
+                                currently require maintenance attention.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="ai-message success-message">
+
+                        <i class="bi bi-check-circle"></i>
+
+                        <div>
+
+                            <strong>
+                                Garage status looks good
+                            </strong>
+
+                            <p>
+
+                                No overdue manufacturer service alert
+                                is currently detected.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+                    <div class="ai-message">
+
+                        <i class="bi bi-receipt"></i>
+
+                        <div>
+
+                            <strong>
+                                Maintenance records
+                            </strong>
+
+                            <p>
+
+                                You have recorded ₹{{ "%.2f"|format(total_service_cost) }}
+                                in maintenance spending.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="ai-question">
+
+                        <span>
+                            Ask AutoCare AI
+                        </span>
+
+                        <p>
+                            “When is my next service?”
+                        </p>
+
+                        <button type="button"
+                                disabled>
+
+                            <i class="bi bi-arrow-right"></i>
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+                <section class="quick-actions-panel reveal-card">
+
+                    <div class="sidebar-heading">
+
+                        <span>
+                            QUICK ACTIONS
+                        </span>
+
+                        <h3>
+                            Manage Garage
+                        </h3>
+
+                    </div>
+
+                    <div class="quick-action-list">
+
+                        <a href="{{ url_for('vehicle.add_vehicle') }}">
+
+                            <span class="quick-action-icon blue">
+
+                                <i class="bi bi-plus-circle"></i>
+
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Add Vehicle
+                                </strong>
+
+                                <small>
+                                    Register a new bike or car
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>
+
+                        {% if vehicle_predictions %}
+
+                        {% set first_vehicle = vehicle_predictions[0].vehicle %}
+
+                        <a href="{{ url_for(
+                                'service.add_service',
+                                vehicle_id=first_vehicle.id
+                            ) }}">
+
+                            <span class="quick-action-icon orange">
+
+                                <i class="bi bi-tools"></i>
+
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Add Service
+                                </strong>
+
+                                <small>
+                                    Record maintenance work
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>
+
+                        <a href="{{ url_for(
+                                'fuel.add_fuel',
+                                vehicle_id=first_vehicle.id
+                            ) }}">
+
+                            <span class="quick-action-icon green">
+
+                                <i class="bi bi-fuel-pump-fill"></i>
+
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Add Fuel
+                                </strong>
+
+                                <small>
+                                    Record a new fuel refill
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>
+
+                        <a href="{{ url_for(
+                                'fuel.fuel_history',
+                                vehicle_id=first_vehicle.id
+                            ) }}">
+
+                            <span class="quick-action-icon blue">
+
+                                <i class="bi bi-graph-up-arrow"></i>
+
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Fuel History
+                                </strong>
+
+                                <small>
+                                    View mileage and fuel spending
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>
+
+                        <a href="{{ url_for(
+                                'garage.garage',
+                                vehicle_id=first_vehicle.id
+                            ) }}">
+
+                            <span class="quick-action-icon purple">
+
+                                <i class="bi bi-box"></i>
+
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Smart Garage
+                                </strong>
+
+                                <small>
+                                    Open vehicle health view
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </section>
+
+            </aside>
+
+        </section>
+
+        {% else %}
+
+        <section class="empty-garage">
+
+            <div class="empty-animation">
+
+                <div class="empty-orbit orbit-one"></div>
+                <div class="empty-orbit orbit-two"></div>
+
+                <i class="bi bi-car-front-fill"></i>
+
+            </div>
+
+            <span class="section-label">
+                DIGITAL GARAGE
+            </span>
+
+            <h2>
+                Your garage is empty
+            </h2>
+
+            <p>
+
+                Add your first vehicle to begin tracking manufacturer
+                service schedules, expenses and maintenance history.
+
+            </p>
+
+            <a href="{{ url_for('vehicle.add_vehicle') }}"
+               class="add-first-vehicle">
+
+                <i class="bi bi-plus-lg"></i>
+
+                Add Your First Vehicle
+
+            </a>
+
+        </section>
+
+        {% endif %}
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+    <script>
+        const notificationButton =
+            document.getElementById("notificationButton");
+
+        const notificationDropdown =
+            document.getElementById("notificationDropdown");
+
+        if (notificationButton && notificationDropdown) {
+            notificationButton.addEventListener(
+                "click",
+                event => {
+                    event.stopPropagation();
+
+                    notificationDropdown.classList.toggle(
+                        "show"
+                    );
+                }
+            );
+
+            document.addEventListener(
+                "click",
+                event => {
+                    if (
+                        !notificationDropdown.contains(event.target)
+                        && !notificationButton.contains(event.target)
+                    ) {
+                        notificationDropdown.classList.remove(
+                            "show"
+                        );
+                    }
+                }
+            );
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const expenseChartCanvas =
+            document.getElementById("expensesChart");
+
+        if (
+            expenseChartCanvas
+            && typeof Chart !== "undefined"
+        ) {
+            const chartLabels =
+                {{ chart_labels | tojson }};
+
+            const serviceCosts =
+                {{ chart_service_costs | tojson }};
+
+            const fuelCosts =
+                {{ chart_fuel_costs | tojson }};
+
+            new Chart(
+                expenseChartCanvas,
+                {
+                    type: "bar",
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            {
+                                label: "Service Cost",
+                                data: serviceCosts,
+                                backgroundColor:
+                                    "rgba(56, 189, 248, 0.85)",
+                                borderColor:
+                                    "rgba(56, 189, 248, 1)",
+                                borderWidth: 1,
+                                borderRadius: 7
+                            },
+                            {
+                                label: "Fuel Cost",
+                                data: fuelCosts,
+                                backgroundColor:
+                                    "rgba(168, 85, 247, 0.75)",
+                                borderColor:
+                                    "rgba(168, 85, 247, 1)",
+                                borderWidth: 1,
+                                borderRadius: 7
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: {
+                            mode: "index",
+                            intersect: false
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color:
+                                        "rgba(255,255,255,0.10)"
+                                },
+                                ticks: {
+                                    color: "#94a3b8",
+                                    callback: value =>
+                                        "₹" + Number(value).toLocaleString()
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: "#94a3b8"
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: "#ffffff"
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: context =>
+                                        context.dataset.label
+                                        + ": ₹"
+                                        + Number(
+                                            context.raw || 0
+                                        ).toLocaleString(
+                                            "en-IN",
+                                            {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            }
+                                        )
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+    </script>
+</body>
+</html>

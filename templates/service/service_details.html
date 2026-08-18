@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details | AutoCare AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { min-height: 100vh; color: white; background: radial-gradient(circle at top left, #12315d, transparent 35%), linear-gradient(135deg, #040b14, #071728); }
+        .details-card { max-width: 800px; margin: auto; padding: 40px; border: 1px solid rgba(148, 163, 184, 0.17); border-radius: 20px; background: rgba(12, 27, 47, 0.87); box-shadow: 0 25px 65px rgba(0,0,0,0.25); }
+        .detail-row { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
+        .detail-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark border-bottom border-secondary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.dashboard') }}">🚗 AutoCare AI</a>
+            <a href="{{ url_for('service.service_history', vehicle_id=vehicle.id) }}" class="btn btn-outline-light">Back to History</a>
+        </div>
+    </nav>
+    <main class="container py-5">
+        <div class="details-card">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+                <div>
+                    <h2 class="fw-bold text-info mb-1">{{ service_record.service_type }}</h2>
+                    <p class="text-secondary mb-0">{{ vehicle.vehicle_name }} ({{ vehicle.registration_number }})</p>
+                </div>
+                <div class="text-end">
+                    <h3 class="fw-bold mb-1">₹{{ "%.2f"|format(service_record.total_cost) }}</h3>
+                    <span class="badge bg-secondary">{{ service_record.service_date.strftime('%d %b %Y') }}</span>
+                </div>
+            </div>
+            
+            <div class="detail-row d-flex justify-content-between">
+                <span class="text-secondary">Odometer</span>
+                <span class="fw-bold">{{ service_record.odometer }} km</span>
+            </div>
+            <div class="detail-row d-flex justify-content-between">
+                <span class="text-secondary">Service Center</span>
+                <span class="fw-bold">{{ service_record.service_center or 'N/A' }}</span>
+            </div>
+            
+            <div class="mt-4 pt-3 border-top border-secondary">
+                <h5 class="text-info mb-3">Work Done & Notes</h5>
+                <p class="bg-dark p-3 rounded text-light" style="white-space: pre-line;">{{ service_record.work_done or 'No detailed notes provided.' }}</p>
+            </div>
+            
+            <div class="d-flex gap-3 mt-5">
+                <a href="{{ url_for('service.edit_service', service_id=service_record.id) }}" class="btn btn-primary px-4"><i class="bi bi-pencil-square me-2"></i>Edit Record</a>
+                <form method="POST" action="{{ url_for('service.delete_service', service_id=service_record.id) }}" onsubmit="return confirm('Delete this record?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger px-4"><i class="bi bi-trash me-2"></i>Delete</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

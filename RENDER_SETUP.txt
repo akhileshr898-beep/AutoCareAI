@@ -1,0 +1,55 @@
+AUTOCARE AI - RENDER DEPLOYMENT
+
+COPY THESE FILES TO:
+C:\PROJECTS VS\AutoCareAI\
+
+1. Dockerfile
+2. requirements.txt
+3. render.yaml
+4. .dockerignore
+
+IMPORTANT:
+Do not commit your .env file.
+
+BEFORE PUSHING:
+cd "C:\PROJECTS VS\AutoCareAI"
+
+py -m py_compile app.py
+py -m py_compile routes\dashboard.py
+py -m py_compile routes\vehicle.py
+py -m py_compile document_extractor.py
+
+GITHUB:
+git init
+git add .
+git commit -m "Prepare AutoCare AI for Render"
+
+Push the project to GitHub.
+
+RENDER:
+1. Open Render Dashboard
+2. New -> Blueprint
+3. Connect your GitHub AutoCareAI repository
+4. Render reads render.yaml
+5. When asked for DATABASE_URL, enter your cloud MySQL connection URL
+6. Deploy
+
+DATABASE_URL FORMAT:
+mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE
+
+IMPORTANT:
+Do not use localhost in production.
+
+HEALTH CHECK:
+/health
+
+OCR:
+The Dockerfile installs tesseract-ocr, so image OCR can work on Render.
+
+UPLOADS:
+On Render Free, local files are temporary and can disappear after restart/redeploy.
+For persistent vehicle images/invoices/documents, use a paid persistent disk or cloud storage.
+
+If using a Render persistent disk with this Dockerfile:
+mount path:
+/app/static/uploads

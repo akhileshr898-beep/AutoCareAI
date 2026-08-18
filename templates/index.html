@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AutoCare AI helps you manage vehicle maintenance, fuel, service history, reminders and vehicle health from one intelligent dashboard.">
+    <meta name="theme-color" content="#080B10">
+
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+
+    <title>AutoCare AI | Smart Vehicle Maintenance Assistant</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script>
+        document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="home-page">
+
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <div class="background-grid" aria-hidden="true"></div>
+    <div class="glow glow-one" aria-hidden="true"></div>
+    <div class="glow glow-two" aria-hidden="true"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark premium-navbar fixed-top"
+         id="mainNav"
+         aria-label="Primary navigation">
+
+        <div class="container">
+
+            <a class="navbar-brand brand-logo"
+               href="{{ url_for('index') }}"
+               aria-label="AutoCare AI home">
+
+                <span class="brand-icon">
+                    <i class="bi bi-car-front-fill" aria-hidden="true"></i>
+                </span>
+
+                <span>AutoCare <strong>AI</strong></span>
+            </a>
+
+            <button class="navbar-toggler border-0"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+
+                    {% if current_user.is_authenticated %}
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
+                    </li>
+
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn nav-action-button"
+                           href="{{ url_for('vehicle.add_vehicle') }}">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                            Add Vehicle
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="btn nav-secondary-button"
+                           href="{{ url_for('auth.logout') }}">
+                            Logout
+                        </a>
+                    </li>
+
+                    {% else %}
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="{{ url_for('auth.login') }}">
+                            Login
+                        </a>
+                    </li>
+
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn nav-action-button"
+                           href="{{ url_for('auth.register') }}">
+                            Get Started
+                        </a>
+                    </li>
+
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+
+        <section class="hero-section">
+
+            <div class="container">
+
+                <div class="row align-items-center min-vh-100 g-5">
+
+                    <div class="col-lg-6">
+
+                        <div class="hero-content">
+
+                            <div class="hero-badge reveal">
+                                <span class="live-dot"></span>
+                                Intelligent vehicle ownership, simplified
+                            </div>
+
+                            <h1 class="hero-title reveal">
+                                Smarter Vehicle Care.
+                                <span class="gradient-text">Powered by AI.</span>
+                            </h1>
+
+                            <p class="hero-description reveal">
+                                Track maintenance, monitor vehicle health, manage fuel expenses,
+                                organize service records and stay ahead of your next service —
+                                all from one intelligent dashboard.
+                            </p>
+
+                            <div class="hero-buttons reveal">
+
+                                {% if current_user.is_authenticated %}
+
+                                <a href="{{ url_for('dashboard.dashboard') }}"
+                                   class="btn primary-cta">
+                                    Open Dashboard
+                                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                </a>
+
+                                <a href="#features"
+                                   class="btn secondary-cta">
+                                    Explore Features
+                                    <i class="bi bi-grid" aria-hidden="true"></i>
+                                </a>
+
+                                {% else %}
+
+                                <a href="{{ url_for('auth.register') }}"
+                                   class="btn primary-cta">
+                                    Get Started
+                                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                </a>
+
+                                <a href="#features"
+                                   class="btn secondary-cta">
+                                    Explore Features
+                                    <i class="bi bi-grid" aria-hidden="true"></i>
+                                </a>
+
+                                {% endif %}
+
+                            </div>
+
+                            <div class="hero-trust reveal">
+
+                                <div class="trust-item">
+                                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                    <span>Secure ownership records</span>
+                                </div>
+
+                                <div class="trust-item">
+                                    <i class="bi bi-phone" aria-hidden="true"></i>
+                                    <span>Mobile-ready experience</span>
+                                </div>
+
+                                <div class="trust-item">
+                                    <i class="bi bi-car-front" aria-hidden="true"></i>
+                                    <span>Cars, bikes & scooters</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+
+                        <div class="hero-vehicle-gallery reveal">
+
+                            <div class="hero-photo-card hero-car-photo">
+
+                                <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=85"
+                                     alt="Premium sports car representing AutoCare AI car management"
+                                     loading="eager"
+                                     fetchpriority="high"
+                                     decoding="async">
+
+                                <div class="photo-shade"></div>
+
+                                <div class="photo-label">
+                                    <span>AUTOCARE AI</span>
+                                    <strong>Smart Car Care</strong>
+                                </div>
+
+                            </div>
+
+                            <div class="hero-photo-card hero-bike-photo">
+
+                                <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85"
+                                     alt="Modern motorcycle representing AutoCare AI motorcycle management"
+                                     loading="eager"
+                                     decoding="async">
+
+                                <div class="photo-shade"></div>
+
+                                <div class="photo-label">
+                                    <span>DIGITAL GARAGE</span>
+                                    <strong>Motorcycle Care</strong>
+                                </div>
+
+                            </div>
+
+                            <div class="gallery-accent-card">
+
+                                <span class="gallery-accent-icon">
+                                    <i class="bi bi-stars" aria-hidden="true"></i>
+                                </span>
+
+                                <div>
+                                    <small>INTELLIGENT OWNERSHIP</small>
+                                    <strong>Maintenance • Fuel • Health</strong>
+                                </div>
+
+                            </div>
+
+                            <div class="gallery-feature-chip chip-maintenance">
+                                <i class="bi bi-tools" aria-hidden="true"></i>
+                                Maintenance
+                            </div>
+
+                            <div class="gallery-feature-chip chip-fuel">
+                                <i class="bi bi-fuel-pump-fill" aria-hidden="true"></i>
+                                Fuel Analytics
+                            </div>
+
+                            <div class="gallery-feature-chip chip-health">
+                                <i class="bi bi-heart-pulse-fill" aria-hidden="true"></i>
+                                Vehicle Health
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            </div>
+        </section>
+
+        <section class="stats-section" aria-label="AutoCare AI capabilities">
+
+            <div class="container">
+
+                <div class="stats-panel reveal">
+
+                    <article class="stat-box">
+                        <strong>24/7</strong>
+                        <span>Vehicle Monitoring</span>
+                    </article>
+
+                    <div class="stat-divider"></div>
+
+                    <article class="stat-box">
+                        <strong>AI</strong>
+                        <span>Maintenance Insights</span>
+                    </article>
+
+                    <div class="stat-divider"></div>
+
+                    <article class="stat-box">
+                        <strong>100%</strong>
+                        <span>Digital Service History</span>
+                    </article>
+
+                    <div class="stat-divider"></div>
+
+                    <article class="stat-box">
+                        <strong>Smart</strong>
+                        <span>Fuel Analytics</span>
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="features-section section-shell"
+                 id="features">
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <span class="section-label">SMART VEHICLE MANAGEMENT</span>
+
+                    <h2>Everything Your Vehicle Needs. One Smart Platform.</h2>
+
+                    <p>
+                        AutoCare AI brings maintenance, fuel, service records and vehicle
+                        ownership insights into one clean digital garage.
+                    </p>
+
+                </div>
+
+                <div class="row g-4">
+
+                    <div class="col-md-6 col-xl-4">
+                        <article class="feature-card-premium reveal">
+                            <div class="feature-icon blue-icon">
+                                <i class="bi bi-stars"></i>
+                            </div>
+                            <h3>AI Maintenance Insights</h3>
+                            <p>
+                                Analyze your recorded vehicle data and highlight maintenance
+                                needs, upcoming service intervals and useful ownership trends.
+                            </p>
+                            <span class="feature-footnote">Intelligent maintenance guidance</span>
+                        </article>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <article class="feature-card-premium reveal">
+                            <div class="feature-icon orange-icon">
+                                <i class="bi bi-bell-fill"></i>
+                            </div>
+                            <h3>Smart Service Reminders</h3>
+                            <p>
+                                Stay informed about scheduled services, oil changes,
+                                insurance, PUC and recurring maintenance tasks.
+                            </p>
+                            <span class="feature-footnote">Reduce missed maintenance</span>
+                        </article>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <article class="feature-card-premium reveal">
+                            <div class="feature-icon green-icon">
+                                <i class="bi bi-fuel-pump-fill"></i>
+                            </div>
+                            <h3>Fuel Analytics</h3>
+                            <p>
+                                Track fuel consumption, mileage, refill costs and efficiency
+                                changes over time from your own fuel records.
+                            </p>
+                            <span class="feature-footnote">Understand every refill</span>
+                        </article>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <article class="feature-card-premium reveal">
+                            <div class="feature-icon cyan-icon">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                            </div>
+                            <h3>Vehicle Health</h3>
+                            <p>
+                                View a simplified vehicle health summary based on maintenance
+                                status, service information and stored ownership records.
+                            </p>
+                            <span class="feature-footnote">Know what needs attention</span>
+                        </article>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <article class="feature-card-premium reveal">
+                            <div class="feature-icon purple-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <h3>Service History</h3>
+                            <p>
+                                Keep a complete digital timeline of maintenance work,
+                                repairs, service visits and costs for every vehicle.
+                            </p>
+                            <span class="feature-footnote">A cleaner ownership record</span>
+                        </article>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <article class="feature-card-premium reveal">
+                            <div class="feature-icon rose-icon">
+                                <i class="bi bi-receipt-cutoff"></i>
+                            </div>
+                            <h3>Expense Tracking</h3>
+                            <p>
+                                Understand what your vehicle costs to run by tracking
+                                maintenance, fuel and recorded ownership expenses.
+                            </p>
+                            <span class="feature-footnote">See where your money goes</span>
+                        </article>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="how-section section-shell"
+                 id="how-it-works">
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+                    <span class="section-label">HOW IT WORKS</span>
+                    <h2>From Vehicle Details to Smarter Decisions.</h2>
+                    <p>
+                        AutoCare AI keeps the workflow simple so you can start tracking
+                        your vehicle without unnecessary setup.
+                    </p>
+                </div>
+
+                <div class="how-grid">
+
+                    <article class="how-step reveal">
+                        <span class="step-number">01</span>
+                        <div class="step-icon">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+                        <h3>Add Your Vehicle</h3>
+                        <p>
+                            Enter basic details about your car, motorcycle or scooter
+                            and create its digital garage profile.
+                        </p>
+                    </article>
+
+                    <div class="step-connector" aria-hidden="true"></div>
+
+                    <article class="how-step reveal">
+                        <span class="step-number">02</span>
+                        <div class="step-icon">
+                            <i class="bi bi-clipboard2-data-fill"></i>
+                        </div>
+                        <h3>Track Your Vehicle</h3>
+                        <p>
+                            Record mileage, fuel refills, service history, documents
+                            and maintenance expenses as you use the vehicle.
+                        </p>
+                    </article>
+
+                    <div class="step-connector" aria-hidden="true"></div>
+
+                    <article class="how-step reveal">
+                        <span class="step-number">03</span>
+                        <div class="step-icon">
+                            <i class="bi bi-stars"></i>
+                        </div>
+                        <h3>Get Smart Insights</h3>
+                        <p>
+                            AutoCare AI uses your recorded data to help you understand
+                            what may need attention next.
+                        </p>
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="ai-preview-section section-shell">
+
+            <div class="container">
+
+                <div class="row align-items-center g-5">
+
+                    <div class="col-lg-5">
+
+                        <div class="content-block reveal">
+
+                            <span class="section-label">AUTOCARE INTELLIGENCE</span>
+
+                            <h2>Useful guidance without the guesswork.</h2>
+
+                            <p>
+                                AutoCare AI turns your recorded ownership data into
+                                simple maintenance recommendations you can understand
+                                at a glance.
+                            </p>
+
+                            <div class="insight-points">
+
+                                <div>
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Service interval awareness</span>
+                                </div>
+
+                                <div>
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Fuel efficiency trends</span>
+                                </div>
+
+                                <div>
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Maintenance cost visibility</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-7">
+
+                        <article class="ai-insight-preview reveal">
+
+                            <div class="ai-preview-header">
+
+                                <div class="ai-preview-brand">
+                                    <div class="ai-avatar">
+                                        <i class="bi bi-stars"></i>
+                                    </div>
+                                    <div>
+                                        <span>AUTOCARE AI</span>
+                                        <strong>Vehicle Insight</strong>
+                                    </div>
+                                </div>
+
+                                <span class="insight-status">
+                                    <span class="status-pulse"></span>
+                                    Active
+                                </span>
+
+                            </div>
+
+                            <div class="ai-insight-main">
+
+                                <div class="insight-symbol">
+                                    <i class="bi bi-droplet-half"></i>
+                                </div>
+
+                                <div>
+                                    <span class="insight-label">MAINTENANCE RECOMMENDATION</span>
+
+                                    <h3>
+                                        Your vehicle is approaching its recommended
+                                        engine oil service interval.
+                                    </h3>
+
+                                    <p>
+                                        Consider planning a service visit within the
+                                        next <strong>420 km</strong> based on the
+                                        mileage and service information currently
+                                        recorded in AutoCare AI.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="insight-meta">
+
+                                <div>
+                                    <span>Priority</span>
+                                    <strong class="priority-medium">Medium</strong>
+                                </div>
+
+                                <div>
+                                    <span>Recommended within</span>
+                                    <strong>420 km</strong>
+                                </div>
+
+                                <div>
+                                    <span>Source</span>
+                                    <strong>Recorded vehicle data</strong>
+                                </div>
+
+                            </div>
+
+                            <div class="ai-disclaimer">
+                                <i class="bi bi-info-circle"></i>
+                                AutoCare AI recommendations are estimates and do not replace
+                                inspection or diagnosis by a qualified mechanic.
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="vehicle-showcase-section section-shell">
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <span class="section-label">BUILT FOR EVERY RIDE</span>
+
+                    <h2>One Digital Garage for Cars and Motorcycles.</h2>
+
+                    <p>
+                        Keep ownership information organized whether you drive a car,
+                        ride a motorcycle, or manage more than one vehicle.
+                    </p>
+
+                </div>
+
+                <div class="vehicle-showcase-grid">
+
+                    <article class="showcase-photo-card showcase-car reveal">
+
+                        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=85"
+                             alt="Modern premium car"
+                             loading="lazy"
+                             decoding="async">
+
+                        <div class="showcase-overlay"></div>
+
+                        <div class="showcase-content">
+
+                            <span class="showcase-kicker">CARS</span>
+
+                            <h3>Complete ownership tracking.</h3>
+
+                            <p>
+                                Service history, maintenance reminders, fuel records
+                                and ownership expenses in one place.
+                            </p>
+
+                            <div class="showcase-tags">
+                                <span>
+                                    <i class="bi bi-tools"></i>
+                                    Service
+                                </span>
+
+                                <span>
+                                    <i class="bi bi-fuel-pump"></i>
+                                    Fuel
+                                </span>
+
+                                <span>
+                                    <i class="bi bi-receipt"></i>
+                                    Expenses
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                    <article class="showcase-photo-card showcase-bike reveal">
+
+                        <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=85"
+                             alt="Modern motorcycle"
+                             loading="lazy"
+                             decoding="async">
+
+                        <div class="showcase-overlay"></div>
+
+                        <div class="showcase-content">
+
+                            <span class="showcase-kicker">MOTORCYCLES</span>
+
+                            <h3>Smarter care for every ride.</h3>
+
+                            <p>
+                                Organize maintenance, fuel consumption, service records
+                                and important reminders from your digital garage.
+                            </p>
+
+                            <div class="showcase-tags">
+                                <span>
+                                    <i class="bi bi-heart-pulse"></i>
+                                    Health
+                                </span>
+
+                                <span>
+                                    <i class="bi bi-clock-history"></i>
+                                    History
+                                </span>
+
+                                <span>
+                                    <i class="bi bi-bell"></i>
+                                    Reminders
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <div class="showcase-capability-strip reveal">
+
+                    <div>
+                        <i class="bi bi-car-front-fill"></i>
+                        <span>
+                            <strong>Multi-Vehicle Garage</strong>
+                            Cars, bikes and scooters
+                        </span>
+                    </div>
+
+                    <div>
+                        <i class="bi bi-stars"></i>
+                        <span>
+                            <strong>AI-Assisted Insights</strong>
+                            Understand what may need attention
+                        </span>
+                    </div>
+
+                    <div>
+                        <i class="bi bi-phone"></i>
+                        <span>
+                            <strong>Responsive Access</strong>
+                            Use AutoCare AI on desktop or phone
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="benefits-section section-shell"
+                 id="about">
+
+            <div class="container">
+
+                <div class="row align-items-center g-5">
+
+                    <div class="col-lg-5">
+
+                        <div class="content-block reveal">
+
+                            <span class="section-label">WHY AUTOCARE AI</span>
+
+                            <h2>Designed for everyday vehicle ownership.</h2>
+
+                            <p>
+                                AutoCare AI focuses on the information that actually matters
+                                when maintaining a vehicle: what was done, what it cost,
+                                what may be due next and how the vehicle is performing.
+                            </p>
+
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard.dashboard') }}"
+                               class="text-link">
+                                View your dashboard
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('auth.register') }}"
+                               class="text-link">
+                                Create your digital garage
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-7">
+
+                        <div class="benefit-grid">
+
+                            <article class="benefit-card reveal">
+                                <i class="bi bi-calendar2-check"></i>
+                                <h3>Prevent missed maintenance</h3>
+                                <p>Keep upcoming service requirements visible.</p>
+                            </article>
+
+                            <article class="benefit-card reveal">
+                                <i class="bi bi-journal-check"></i>
+                                <h3>Organized service records</h3>
+                                <p>Maintain one digital service history per vehicle.</p>
+                            </article>
+
+                            <article class="benefit-card reveal">
+                                <i class="bi bi-fuel-pump"></i>
+                                <h3>Understand fuel expenses</h3>
+                                <p>Track refills, mileage and fuel spending patterns.</p>
+                            </article>
+
+                            <article class="benefit-card reveal">
+                                <i class="bi bi-heart-pulse"></i>
+                                <h3>Monitor vehicle health</h3>
+                                <p>See simplified maintenance status in one view.</p>
+                            </article>
+
+                            <article class="benefit-card reveal">
+                                <i class="bi bi-wallet2"></i>
+                                <h3>Reduce unexpected costs</h3>
+                                <p>Use better records to plan maintenance spending.</p>
+                            </article>
+
+                            <article class="benefit-card reveal">
+                                <i class="bi bi-collection"></i>
+                                <h3>Manage multiple vehicles</h3>
+                                <p>Keep every vehicle inside the same digital garage.</p>
+                            </article>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="cta-section">
+
+            <div class="container">
+
+                <div class="cta-panel reveal">
+
+                    <div>
+
+                        <span class="section-label">START YOUR DIGITAL GARAGE</span>
+
+                        <h2>Take Better Care of Your Vehicle.</h2>
+
+                        <p>
+                            Create your digital garage and start managing your vehicle smarter.
+                        </p>
+
+                    </div>
+
+                    {% if current_user.is_authenticated %}
+
+                    <a href="{{ url_for('vehicle.add_vehicle') }}"
+                       class="btn primary-cta">
+                        Add Your First Vehicle
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                    {% else %}
+
+                    <a href="{{ url_for('auth.register') }}"
+                       class="btn primary-cta">
+                        Add Your First Vehicle
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="premium-footer">
+
+        <div class="container">
+
+            <div class="footer-grid">
+
+                <div class="footer-brand-block">
+
+                    <a class="brand-logo footer-brand"
+                       href="{{ url_for('index') }}">
+
+                        <span class="brand-icon">
+                            <i class="bi bi-car-front-fill"></i>
+                        </span>
+
+                        <span>AutoCare <strong>AI</strong></span>
+                    </a>
+
+                    <p>
+                        Intelligent vehicle maintenance and ownership management.
+                    </p>
+
+                </div>
+
+                <div class="footer-links-block">
+                    <span>Product</span>
+                    <a href="{{ url_for('index') }}">Home</a>
+                    <a href="#features">Features</a>
+
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}">Dashboard</a>
+                    {% endif %}
+
+                    <a href="#about">About</a>
+                </div>
+
+                <div class="footer-links-block">
+                    <span>Account</span>
+
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('vehicle.add_vehicle') }}">Add Vehicle</a>
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}">Login</a>
+                    <a href="{{ url_for('auth.register') }}">Get Started</a>
+                    {% endif %}
+                </div>
+
+                <div class="footer-links-block">
+                    <span>Information</span>
+                    <a href="#about">About AutoCare AI</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#features">Features</a>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                <span>© 2026 AutoCare AI. All rights reserved.</span>
+                <span>Smart maintenance. Safer journeys.</span>
+            </div>
+
+        </div>
+
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Fuel | AutoCare AI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            color: white;
+            background: radial-gradient(circle at top left, #12315d, transparent 35%), linear-gradient(135deg, #040b14, #071728);
+        }
+
+        .fuel-form-card {
+            max-width: 820px;
+            margin: auto;
+            padding: 35px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 26px;
+            background: rgba(12, 27, 47, 0.9);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+        }
+
+        .form-control,
+        .input-group-text {
+            min-height: 49px;
+            color: white;
+            border-color: rgba(148, 163, 184, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+            .form-control:focus {
+                color: white;
+                border-color: #38bdf8;
+                background: rgba(255, 255, 255, 0.07);
+                box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+            }
+
+            .form-control[readonly] {
+                color: #6ee7b7;
+                font-weight: 700;
+                background: rgba(16, 185, 129, 0.08);
+            }
+
+        .vehicle-info,
+        .calculation-box {
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .vehicle-info {
+            background: rgba(37, 99, 235, 0.11);
+        }
+
+        .calculation-box {
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            background: rgba(16, 185, 129, 0.07);
+        }
+
+        .save-button {
+            min-height: 52px;
+            border: 0;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #0891b2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark border-bottom border-secondary">
+
+        <div class="container">
+
+            <a class="navbar-brand fw-bold"
+               href="{{ url_for('dashboard.dashboard') }}">
+
+                🚗 AutoCare AI
+
+            </a>
+
+            <a href="{{ url_for(
+            'fuel.fuel_history',
+            vehicle_id=vehicle.id
+        ) }}"
+               class="btn btn-outline-light">
+
+                Back to Fuel History
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <main class="container py-5">
+
+        <div class="fuel-form-card">
+
+            <span class="text-info fw-semibold">
+                FUEL TRACKER
+            </span>
+
+            <h1 class="fw-bold mt-2">
+                Edit Fuel Entry
+            </h1>
+
+            <div class="vehicle-info mt-3 mb-4">
+
+                <strong>
+                    {{ vehicle.vehicle_name }}
+                </strong>
+
+                <div class="text-secondary">
+
+                    {{ vehicle.company }}
+                    {{ vehicle.model }}
+                    ·
+                    {{ vehicle.registration_number }}
+
+                </div>
+
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% for category, message in messages %}
+
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+            {% endwith %}
+
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Refill Date *
+                        </label>
+
+                        <input type="date"
+                               name="refill_date"
+                               class="form-control"
+                               value="{{ fuel_record.refill_date.strftime('%Y-%m-%d') }}"
+                               required>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Odometer *
+                        </label>
+
+                        <div class="input-group">
+
+                            <input type="number"
+                                   name="odometer"
+                                   class="form-control"
+                                   min="0"
+                                   value="{{ fuel_record.odometer }}"
+                                   required>
+
+                            <span class="input-group-text">
+                                km
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Price per Litre *
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                ₹
+                            </span>
+
+                            <input type="number"
+                                   name="price_per_litre"
+                                   id="pricePerLitre"
+                                   class="form-control"
+                                   min="0.01"
+                                   step="0.01"
+                                   value="{{ '%.2f'|format(fuel_record.price_per_litre) }}"
+                                   required>
+
+                            <span class="input-group-text">
+                                / L
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Total Amount *
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                ₹
+                            </span>
+
+                            <input type="number"
+                                   name="total_amount"
+                                   id="totalAmount"
+                                   class="form-control"
+                                   min="0.01"
+                                   step="0.01"
+                                   value="{{ '%.2f'|format(fuel_record.total_amount) }}"
+                                   required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <div class="calculation-box">
+
+                            <label class="form-label">
+                                Calculated Fuel Quantity
+                            </label>
+
+                            <div class="input-group">
+
+                                <input type="text"
+                                       id="calculatedLitres"
+                                       class="form-control"
+                                       value="{{ '%.2f'|format(fuel_record.litres) }}"
+                                       readonly>
+
+                                <span class="input-group-text">
+                                    litres
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Fuel Station
+                        </label>
+
+                        <input type="text"
+                               name="fuel_station"
+                               class="form-control"
+                               value="{{ fuel_record.fuel_station or '' }}"
+                               placeholder="Example: Indian Oil, Mangalore">
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <div class="form-check">
+
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="full_tank"
+                                   id="fullTank"
+                                   {% if fuel_record.full_tank %}checked{% endif %}>
+
+                            <label class="form-check-label"
+                                   for="fullTank">
+
+                                Tank filled completely
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Notes
+                        </label>
+
+                        <textarea name="notes"
+                                  class="form-control"
+                                  rows="3">{{ fuel_record.notes or '' }}</textarea>
+
+                    </div>
+
+                    <div class="col-12 mt-4">
+
+                        <button type="submit"
+                                class="btn btn-primary save-button w-100">
+
+                            <i class="bi bi-check-lg me-2"></i>
+
+                            Save Changes
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <script>const priceInput = document.getElementById("pricePerLitre");
+    const amountInput = document.getElementById("totalAmount");
+    const litresInput = document.getElementById("calculatedLitres");
+
+    function calculateLitres() {
+        const price = Number.parseFloat(priceInput.value);
+        const amount = Number.parseFloat(amountInput.value);
+
+        if (
+            Number.isFinite(price)
+            && Number.isFinite(amount)
+            && price > 0
+            && amount > 0
+        ) {
+            litresInput.value = (amount / price).toFixed(2);
+        } else {
+            litresInput.value = "";
+        }
+    }
+
+    priceInput.addEventListener("input", calculateLitres);
+    amountInput.addEventListener("input", calculateLitres);</script>
+
+</body>
+</html>
