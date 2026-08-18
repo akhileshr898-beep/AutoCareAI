@@ -1,3 +1,9 @@
+databases:
+  - name: autocare-db
+    plan: free
+    region: singapore
+    databaseName: autocare_ai
+
 services:
   - type: web
     name: autocare-ai
@@ -11,7 +17,9 @@ services:
         generateValue: true
 
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: autocare-db
+          property: connectionString
 
       - key: FLASK_ENV
         value: production
