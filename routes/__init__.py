@@ -1,4 +1,3 @@
-import os
 
 # Ensures the routes module is treated as a package.
 # We will import blueprints from their respective modules in app.py or here.

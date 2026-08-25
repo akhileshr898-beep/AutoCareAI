@@ -1,9 +1,14 @@
 import json
 import os
+import re
+import secrets
+import smtplib
 import urllib.error
 import urllib.request
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from urllib.parse import quote, quote_plus
 from uuid import uuid4
@@ -20,6 +25,7 @@ from flask import (
     render_template,
     request,
     send_from_directory,
+    session,
     url_for,
 )
 
@@ -46,7 +52,11 @@ from werkzeug.utils import secure_filename
 # APPLICATION CONFIGURATION
 # =========================================================
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=os.path.join(os.path.dirname(__file__), "../../templates"),
+    static_folder=os.path.join(os.path.dirname(__file__), "../../static"),
+)
 
 app.config["SECRET_KEY"] = "autocare-ai-secret-key"
 
@@ -951,6 +961,190 @@ def logout():
     return redirect(
         url_for("login")
     )
+
+
+
+# =========================================================
+# PASSWORD RESET HELPERS
+# =========================================================
+
+def _validate_password(password):
+    if len(password) < 10:
+        return "Password must be at least 10 characters long."
+    if not re.search(r"[A-Z]", password):
+        return "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return "Password must contain at least one lowercase letter."
+    if not re.search(r"[0-9]", password):
+        return "Password must contain at least one number."
+    if not re.search(r"[!@#$%^&*()_+\-=?.]", password):
+        return "Password must contain at least one special character."
+    return None
+
+def _generate_otp():
+    return f"{secrets.randbelow(1000000):06d}"
+
+def _send_reset_email(to_email, otp):
+    mail_username = os.environ.get("MAIL_USERNAME")
+    mail_password = os.environ.get("MAIL_PASSWORD")
+    mail_from = os.environ.get("MAIL_FROM", mail_username)
+    if not mail_username or not mail_password:
+        app.logger.warning(f"Email credentials not configured. DEV MODE - OTP is: {otp}")
+        print(f"\n{'='*50}\nDEV MODE: Email not sent.\nOTP for {to_email} is: {otp}\n{'='*50}\n")
+        return True
+    subject = "AutoCare AI - Password Reset Code"
+    body = f"""Hello,
+
+We received a request to reset your AutoCare AI password.
+
+Your verification code is:
+
+{otp}
+
+This code expires in 10 minutes.
+
+If you did not request a password reset, you can ignore this email.
+
+AutoCare AI
+Smart maintenance. Safer journeys."""
+    msg = MIMEMultipart()
+    msg["From"] = mail_from
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(mail_username, mail_password)
+        server.sendmail(mail_from, to_email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        app.logger.error(f"Failed to send email: {e}")
+        return False
+
+
+
+# =========================================================
+# FORGOT / RESET PASSWORD ROUTES
+# =========================================================
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        if not email:
+            flash("Please enter your email address.", "danger")
+            return redirect(url_for("forgot_password"))
+        user = User.query.filter_by(email=email).first()
+        if user:
+            otp = _generate_otp()
+            
+            # Save to session (expires in 10 mins)
+            session["reset_email"] = email
+            session["reset_otp"] = otp
+            session["reset_expiry"] = (datetime.now(timezone.utc) + timedelta(minutes=10)).timestamp()
+            session["reset_attempts"] = 0
+            session["reset_verified"] = False
+
+            # Send email
+            if _send_reset_email(email, otp):
+                flash("Verification code sent to your email.", "success")
+                if not os.environ.get("MAIL_PASSWORD"):
+                    flash(f"DEV MODE: Your verification code is {otp}", "info")
+                return redirect(url_for("verify_reset_code"))
+            else:
+                flash("Failed to send verification email. Please try again later.", "danger")
+        
+        flash("If an account exists for this email, a verification code has been sent.", "info")
+        return redirect(url_for("verify_reset_code"))
+    return render_template("auth/forgot_password.html")
+
+
+@app.route("/verify-reset-code", methods=["GET", "POST"])
+def verify_reset_code():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    if "reset_email" not in session or "reset_otp" not in session:
+        flash("Please request a password reset first.", "warning")
+        return redirect(url_for("forgot_password"))
+    if request.method == "POST":
+        code = request.form.get("code", "").strip()
+        attempts = session.get("reset_attempts", 0)
+        if attempts >= 5:
+            session.pop("reset_email", None)
+            session.pop("reset_otp", None)
+            session.pop("reset_expiry", None)
+            session.pop("reset_attempts", None)
+            flash("Too many failed attempts. Please request a new code.", "danger")
+            return redirect(url_for("forgot_password"))
+        expiry = session.get("reset_expiry", 0)
+        if datetime.now(timezone.utc).timestamp() > expiry:
+            flash("This verification code has expired. Please request a new code.", "danger")
+            return redirect(url_for("verify_reset_code"))
+        if code == session.get("reset_otp"):
+            session["reset_verified"] = True
+            flash("Code verified successfully.", "success")
+            return redirect(url_for("reset_password"))
+        else:
+            session["reset_attempts"] = attempts + 1
+            flash("Invalid verification code.", "danger")
+    return render_template("auth/verify_reset_code.html")
+
+
+@app.route("/resend-reset-code")
+def resend_reset_code():
+    if "reset_email" not in session:
+        return redirect(url_for("forgot_password"))
+    email = session["reset_email"]
+    otp = _generate_otp()
+    session["reset_otp"] = otp
+    session["reset_expiry"] = (datetime.now(timezone.utc) + timedelta(minutes=10)).timestamp()
+    session["reset_attempts"] = 0
+    session["reset_verified"] = False
+    if _send_reset_email(email, otp):
+        flash("A new verification code has been sent.", "info")
+        if not os.environ.get("MAIL_PASSWORD"):
+            flash(f"DEV MODE: Your verification code is {otp}", "info")
+    else:
+        flash("Failed to send verification email.", "danger")
+    return redirect(url_for("verify_reset_code"))
+
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    if not session.get("reset_verified"):
+        flash("Please verify your reset code first.", "warning")
+        return redirect(url_for("verify_reset_code"))
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        pwd_error = _validate_password(password)
+        if pwd_error:
+            flash(pwd_error, "danger")
+            return redirect(url_for("reset_password"))
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return redirect(url_for("reset_password"))
+        email = session.get("reset_email")
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.set_password(password)
+            db.session.commit()
+        session.pop("reset_email", None)
+        session.pop("reset_otp", None)
+        session.pop("reset_expiry", None)
+        session.pop("reset_attempts", None)
+        session.pop("reset_verified", None)
+        flash("Your password has been reset successfully. Please log in with your new password.", "success")
+        return redirect(url_for("login"))
+    return render_template("auth/reset_password.html")
 
 
 @app.route("/offline")

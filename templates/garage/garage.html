@@ -112,20 +112,24 @@
                     <div class="vehicle-display">
 
                         {% if vehicle.vehicle_image %}
-
-                        <img src="{{ url_for(
-                            'static',
-                            filename='uploads/' + vehicle.vehicle_image
-                        ) }}"
-                             alt="{{ vehicle.vehicle_name }}"
-                             id="vehicleImage">
-
+                            {% if vehicle.vehicle_image.endswith('.glb') %}
+                                <model-viewer src="{{ url_for('static', filename='uploads/' + vehicle.vehicle_image) }}"
+                                              alt="{{ vehicle.vehicle_name }}"
+                                              id="vehicleImage"
+                                              camera-controls
+                                              auto-rotate
+                                              shadow-intensity="1"
+                                              style="width: 100%; height: 100%; min-height: 400px; background-color: transparent;">
+                                </model-viewer>
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/' + vehicle.vehicle_image) }}"
+                                     alt="{{ vehicle.vehicle_name }}"
+                                     id="vehicleImage">
+                            {% endif %}
                         {% else %}
-
-                        <div class="vehicle-placeholder">
-                            <i class="bi bi-car-front-fill"></i>
-                        </div>
-
+                            <div class="vehicle-placeholder">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
                         {% endif %}
 
                     </div>
@@ -1147,6 +1151,17 @@
             });
         });
     </script>
-
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Setup for 3D model hotspots
+            const modelViewer = document.querySelector('model-viewer');
+            if(modelViewer) {
+                // If model viewer exists, hide the 2D hotspots as we will use 3D ones
+                const hotspots2D = document.querySelector('.digital-twin-hotspots');
+                if (hotspots2D) hotspots2D.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

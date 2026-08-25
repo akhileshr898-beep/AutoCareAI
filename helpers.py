@@ -1,11 +1,17 @@
 import os
 from uuid import uuid4
-from datetime import date, datetime, timezone
+from datetime import date
 from dateutil.relativedelta import relativedelta
 from werkzeug.utils import secure_filename
 from models import Reminder, db
+import re
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from flask import current_app
 
-ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'glb'}
 ALLOWED_DOC_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
 def allowed_image(filename):
@@ -127,7 +133,6 @@ def get_puc_status(vehicle):
     return 'valid'
 
 def generate_reminders(user):
-    today = date.today()
     for vehicle in user.vehicles:
         # Service Reminders
         pred = predict_next_service(vehicle)
@@ -206,3 +211,61 @@ def calculate_fuel_statistics(records):
         "avg_mileage": round(avg_mileage, 2),
         "fill_ups": len(records)
     }
+
+def validate_password(password):
+    if len(password) < 10:
+        return "Password must be at least 10 characters long."
+    if not re.search(r"[A-Z]", password):
+        return "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return "Password must contain at least one lowercase letter."
+    if not re.search(r"[0-9]", password):
+        return "Password must contain at least one number."
+    if not re.search(r"[!@#$%^&*()_+\-=?.]", password):
+        return "Password must contain at least one special character."
+    return None
+
+def generate_otp():
+    return f"{secrets.randbelow(1000000):06d}"
+
+def send_reset_email(to_email, otp):
+    mail_username = os.environ.get("MAIL_USERNAME")
+    mail_password = os.environ.get("MAIL_PASSWORD")
+    mail_from = os.environ.get("MAIL_FROM", mail_username)
+    
+    if not mail_username or not mail_password:
+        current_app.logger.warning(f"Email credentials not configured. DEV MODE - OTP is: {otp}")
+        print(f"\n{'='*50}\nDEV MODE: Email not sent.\nOTP for {to_email} is: {otp}\n{'='*50}\n")
+        return True
+        
+    subject = "AutoCare AI - Password Reset Code"
+    body = (
+        "Hello,\n\n"
+        "We received a request to reset your AutoCare AI password.\n\n"
+        "Your verification code is:\n\n"
+        f"{otp}\n\n"
+        "This code expires in 10 minutes.\n\n"
+        "If you did not request a password reset, you can ignore this email.\n\n"
+        "AutoCare AI\n"
+        "Smart maintenance. Safer journeys."
+    )
+
+    msg = MIMEMultipart()
+    msg['From'] = mail_from
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(mail_username, mail_password)
+        server.sendmail(mail_from, to_email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        current_app.logger.error(f"Failed to send email: {e}")
+        return False
+

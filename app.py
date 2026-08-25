@@ -647,5 +647,5 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=port,
         debug=True,
-        use_reloader=False,
+        use_reloader=True,
     )

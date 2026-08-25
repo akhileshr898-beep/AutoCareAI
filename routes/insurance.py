@@ -58,7 +58,7 @@ def insurance_puc(vehicle_id):
             flash('Insurance and PUC details updated successfully.', 'success')
             return redirect(url_for('insurance.insurance_puc', vehicle_id=vehicle.id))
             
-        except (ValueError, InvalidOperation) as e:
+        except (ValueError, InvalidOperation):
             db.session.rollback()
             flash('Invalid data provided. Please check dates and numbers.', 'danger')
             

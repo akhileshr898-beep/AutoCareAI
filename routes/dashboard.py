@@ -1420,4 +1420,4 @@ def dashboard():
 
 # Some versions of routes/__init__.py import "dashboard",
 # while the current app imports "dashboard_bp".
-dashboard = dashboard_bp
+# dashboard = dashboard_bp

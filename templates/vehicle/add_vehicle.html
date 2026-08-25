@@ -1059,3 +1059,139 @@
             document.getElementById(
                 "insuranceProvider"
             );
+
+        // Fetch Vehicle Makes
+        async function fetchMakes() {
+            const vType = catalogueVehicleType.value || "Car";
+            catalogueMake.innerHTML = '<option value="">Loading...</option>';
+            catalogueModel.innerHTML = '<option value="">Select Manufacturer First</option>';
+            catalogueModel.disabled = true;
+
+            try {
+                const response = await fetch(`/api/vehicle-makes?vehicle_type=${encodeURIComponent(vType)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    catalogueMake.innerHTML = '<option value="">Select Manufacturer</option>';
+                    data.makes.forEach(make => {
+                        const opt = document.createElement("option");
+                        opt.value = make.name;
+                        opt.textContent = make.name;
+                        catalogueMake.appendChild(opt);
+                    });
+                } else {
+                    catalogueMake.innerHTML = '<option value="">Error loading</option>';
+                }
+            } catch (err) {
+                catalogueMake.innerHTML = '<option value="">Error loading</option>';
+            }
+        }
+
+        // Fetch Vehicle Models
+        async function fetchModels() {
+            const make = catalogueMake.value;
+            const year = catalogueYear.value;
+            const vType = catalogueVehicleType.value || "Car";
+
+            if (!make) {
+                catalogueModel.innerHTML = '<option value="">Select Manufacturer First</option>';
+                catalogueModel.disabled = true;
+                return;
+            }
+
+            catalogueModel.innerHTML = '<option value="">Loading models...</option>';
+            catalogueModel.disabled = true;
+
+            try {
+                let url = `/api/vehicle-models?make=${encodeURIComponent(make)}&vehicle_type=${encodeURIComponent(vType)}`;
+                if (year) url += `&year=${encodeURIComponent(year)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    catalogueModel.innerHTML = '<option value="">Select Model</option>';
+                    data.models.forEach(mod => {
+                        const opt = document.createElement("option");
+                        opt.value = mod.name;
+                        opt.textContent = mod.name;
+                        catalogueModel.appendChild(opt);
+                    });
+                    catalogueModel.disabled = false;
+                } else {
+                    catalogueModel.innerHTML = '<option value="">Error loading models</option>';
+                }
+            } catch (err) {
+                catalogueModel.innerHTML = '<option value="">Error loading models</option>';
+            }
+        }
+
+        if (catalogueVehicleType) catalogueVehicleType.addEventListener("change", fetchMakes);
+        if (catalogueMake) catalogueMake.addEventListener("change", fetchModels);
+        if (catalogueYear) catalogueYear.addEventListener("change", fetchModels);
+
+        if (applyCatalogueButton) {
+            applyCatalogueButton.addEventListener("click", () => {
+                if (catalogueMake.value) company.value = catalogueMake.value;
+                if (catalogueModel.value) model.value = catalogueModel.value;
+                if (catalogueVehicleType.value) vehicleType.value = catalogueVehicleType.value.toLowerCase();
+                if (catalogueYear.value) manufacturingYearInput.value = catalogueYear.value;
+                
+                // Show selected vehicle card
+                if (selectedVehicleCard) {
+                    selectedVehicleCard.style.display = "block";
+                    selectedVehicleTitle.textContent = `${company.value} ${model.value}`;
+                    selectedVehicleMeta.textContent = `${catalogueYear.value} | ${vehicleType.value}`;
+                }
+                if (cataloguePanel) cataloguePanel.style.display = "none";
+            });
+        }
+        
+        const manualModeButton = document.getElementById("manualModeButton");
+        const applyManualButton = document.getElementById("applyManualButton");
+        const changeVehicleButton = document.getElementById("changeVehicleButton");
+        const catalogueModeButton = document.getElementById("catalogueModeButton");
+        
+        if (manualModeButton) {
+            manualModeButton.addEventListener("click", () => {
+                if (cataloguePanel) cataloguePanel.style.display = "none";
+                if (manualEntryPanel) manualEntryPanel.style.display = "block";
+            });
+        }
+        
+        if (catalogueModeButton) {
+            catalogueModeButton.addEventListener("click", () => {
+                if (manualEntryPanel) manualEntryPanel.style.display = "none";
+                if (cataloguePanel) cataloguePanel.style.display = "block";
+            });
+        }
+        
+        if (applyManualButton) {
+            applyManualButton.addEventListener("click", () => {
+                const manualMake = document.getElementById("manualMake");
+                const manualModel = document.getElementById("manualModel");
+                
+                if (manualMake && manualMake.value) company.value = manualMake.value;
+                if (manualModel && manualModel.value) model.value = manualModel.value;
+                
+                if (manualEntryPanel) manualEntryPanel.style.display = "none";
+                if (selectedVehicleCard) {
+                    selectedVehicleCard.style.display = "block";
+                    selectedVehicleTitle.textContent = `${company.value} ${model.value}`;
+                }
+            });
+        }
+        
+        if (changeVehicleButton) {
+            changeVehicleButton.addEventListener("click", () => {
+                if (selectedVehicleCard) selectedVehicleCard.style.display = "none";
+                if (cataloguePanel) cataloguePanel.style.display = "block";
+            });
+        }
+
+        // Initialize makes on load
+        fetchMakes();
+    </script>
+</body>
+</html>
+
