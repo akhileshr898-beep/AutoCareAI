@@ -232,6 +232,9 @@ migrate.init_app(
     db,
 )
 
+from extensions import limiter
+limiter.init_app(app)
+
 csrf.init_app(
     app
 )

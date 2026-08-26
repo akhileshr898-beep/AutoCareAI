@@ -1163,6 +1163,7 @@
                     selectedVehicleMeta.textContent = `${catalogueYear.value} | ${vehicleType.value}`;
                 }
                 if (cataloguePanel) cataloguePanel.style.display = "none";
+                if (saveVehicleButton) saveVehicleButton.disabled = false;
             });
         }
         
@@ -1193,11 +1194,18 @@
                 if (manualMake && manualMake.value) company.value = manualMake.value;
                 if (manualModel && manualModel.value) model.value = manualModel.value;
                 
-                if (manualEntryPanel) manualEntryPanel.style.display = "none";
+                // For manual, we'll set defaults for required hidden fields if not provided
+                if (!vehicleType.value) vehicleType.value = "car";
+                if (!fuelType.value) fuelType.value = "petrol";
+                
                 if (selectedVehicleCard) {
                     selectedVehicleCard.style.display = "block";
                     selectedVehicleTitle.textContent = `${company.value} ${model.value}`;
+                    selectedVehicleMeta.textContent = "Manual Entry";
                 }
+                
+                if (manualEntryPanel) manualEntryPanel.style.display = "none";
+                if (saveVehicleButton) saveVehicleButton.disabled = false;
             });
         }
         

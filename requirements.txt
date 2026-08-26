@@ -17,3 +17,5 @@ pdfplumber>=0.11,<1
 Pillow>=10,<13
 pytesseract>=0.3.13,<1
 gunicorn>=23,<24
+Flask-Limiter==4.1.1
+limits==5.8.0
