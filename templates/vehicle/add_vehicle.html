@@ -846,7 +846,8 @@
                                        name="insurance_provider"
                                        id="insuranceProvider"
                                        class="form-control"
-                                       placeholder="Insurance company">
+                                       placeholder="Insurance company"
+                                       required>
                             </div>
 
                             <div class="col-md-6">
@@ -857,7 +858,8 @@
                                        name="insurance_policy_number"
                                        id="insurancePolicyNumber"
                                        class="form-control text-uppercase"
-                                       placeholder="Auto-filled when available">
+                                       placeholder="Auto-filled when available"
+                                       required>
                             </div>
 
                             <div class="col-md-4">
@@ -911,7 +913,8 @@
                                        name="puc_certificate_number"
                                        id="pucCertificateNumber"
                                        class="form-control text-uppercase"
-                                       placeholder="Auto-filled when available">
+                                       placeholder="Auto-filled when available"
+                                       required>
                             </div>
 
                             <div class="col-md-4">
@@ -950,8 +953,7 @@
 
                                 <button type="submit"
                                         class="btn btn-primary btn-lg w-100"
-                                        id="saveVehicleButton"
-                                        disabled>
+                                        id="saveVehicleButton">
 
                                     Save Vehicle
 
@@ -1218,6 +1220,17 @@
 
         // Initialize makes on load
         fetchMakes();
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                if (cataloguePanel && cataloguePanel.style.display !== 'none' && catalogueMake && catalogueMake.value) {
+                    if (applyCatalogueButton) applyCatalogueButton.click();
+                } else if (manualEntryPanel && manualEntryPanel.style.display !== 'none' && document.getElementById('manualMake').value) {
+                    if (applyManualButton) applyManualButton.click();
+                }
+                if (!vehicleName.value) vehicleName.value = company.value + ' ' + model.value;
+            });
+        }
     </script>
 </body>
 </html>
