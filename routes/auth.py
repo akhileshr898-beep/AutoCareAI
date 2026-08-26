@@ -112,7 +112,7 @@ def forgot_password():
             
             send_reset_email(email, otp)
             if not os.environ.get("MAIL_PASSWORD"):
-                flash(f"DEV MODE: Your verification code is {otp}", "info")
+                pass # Dev mode OTP banner removed
             
         flash('If an account exists for this email, a verification code has been sent.', 'info')
         return redirect(url_for('auth.verify_reset_code'))
@@ -172,7 +172,7 @@ def resend_reset_code():
     send_reset_email(email, otp)
     flash('A new verification code has been sent.', 'info')
     if not os.environ.get("MAIL_PASSWORD"):
-        flash(f"DEV MODE: Your verification code is {otp}", "info")
+        pass # Dev mode OTP banner removed
     return redirect(url_for('auth.verify_reset_code'))
 
 @auth.route('/reset-password', methods=['GET', 'POST'])
