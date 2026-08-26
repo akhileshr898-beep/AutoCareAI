@@ -1140,12 +1140,26 @@
         if (catalogueMake) catalogueMake.addEventListener("change", fetchModels);
         if (catalogueYear) catalogueYear.addEventListener("change", fetchModels);
 
+        function checkCatalogueForm() {
+            if (applyCatalogueButton) {
+                if (catalogueMake && catalogueMake.value && catalogueModel && catalogueModel.value) {
+                    applyCatalogueButton.disabled = false;
+                } else {
+                    applyCatalogueButton.disabled = true;
+                }
+            }
+        }
+        if (catalogueMake) catalogueMake.addEventListener("change", checkCatalogueForm);
+        if (catalogueModel) catalogueModel.addEventListener("change", checkCatalogueForm);
+        if (catalogueYear) catalogueYear.addEventListener("change", checkCatalogueForm);
+
         if (applyCatalogueButton) {
             applyCatalogueButton.addEventListener("click", () => {
                 if (catalogueMake.value) company.value = catalogueMake.value;
                 if (catalogueModel.value) model.value = catalogueModel.value;
                 if (catalogueVehicleType.value) vehicleType.value = catalogueVehicleType.value.toLowerCase();
                 if (catalogueYear.value) manufacturingYearInput.value = catalogueYear.value;
+                if (catalogueFuelType && catalogueFuelType.value) fuelType.value = catalogueFuelType.value;
                 
                 // Show selected vehicle card
                 if (selectedVehicleCard) {
