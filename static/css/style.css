@@ -2532,7 +2532,7 @@ a:hover { color: #C4B5FD; text-decoration: underline; }
 
 /* Form inputs and labels */
 .form-label { font-weight: 600; color: var(--text-soft); font-size: 1rem; }
-.form-control { background-color: var(--surface-elevated); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: var(--radius-sm); }
+.form-control { -webkit-appearance: none; appearance: none; background-color: var(--surface-elevated); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: var(--radius-sm); }
 .form-control:focus { background-color: var(--surface); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); color: var(--text); }
 
 

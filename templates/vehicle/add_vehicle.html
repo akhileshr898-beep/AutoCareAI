@@ -307,6 +307,7 @@
                                    id="vehicleDocumentFiles"
                                    class="form-control"
                                    accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
+                                   capture="environment"
                                    multiple>
 
                             <div class="form-text">
@@ -773,7 +774,7 @@
                                 </label>
 
                                 <input type="file"
-                                       name="vehicle_image"
+                                       name="vehicle_image" capture="environment"
                                        class="form-control"
                                        accept=".png,.jpg,.jpeg,.webp">
 
@@ -985,8 +986,17 @@
         const catalogueVehicleType =
             document.getElementById("catalogueVehicleType");
 
-        const catalogueYear =
-            document.getElementById("catalogueYear");
+        const catalogueYear = document.getElementById("catalogueYear");
+        if (catalogueYear) {
+            const currentYear = new Date().getFullYear();
+            catalogueYear.innerHTML = '<option value="">Any Year (All Models)</option>';
+            for (let y = currentYear + 1; y >= 1995; y--) {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.textContent = y;
+                catalogueYear.appendChild(opt);
+            }
+        }
 
         const catalogueMake =
             document.getElementById("catalogueMake");
