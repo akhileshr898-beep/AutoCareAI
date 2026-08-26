@@ -2532,12 +2532,17 @@ a:hover { color: #C4B5FD; text-decoration: underline; }
 
 /* Form inputs and labels */
 .form-label { font-weight: 600; color: var(--text-soft); font-size: 1rem; }
-.form-control { -webkit-appearance: none; appearance: none; background-color: var(--surface-elevated); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: var(--radius-sm); }
-.form-control:focus { background-color: var(--surface); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); color: var(--text); }
+.form-control, .form-select { -webkit-appearance: none; appearance: none; background-color: var(--surface-elevated); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: var(--radius-sm); }
+.form-control:focus, .form-select:focus { background-color: var(--surface); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); color: var(--text); }
 
 
 /* Auth Card Layout */
 .auth-card { background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border); padding: 2.5rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-heavy); width: 100%; max-width: 440px; margin: auto; }
 .auth-logo { font-size: 3rem; margin-bottom: 1rem; }
 .auth-body { background: radial-gradient(circle at top, var(--surface-elevated), var(--bg)); }
+
+
+/* Fix Bootstrap Card Dark Theme */
+.card { background-color: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.vehicle-form-card { background: var(--surface-glass) !important; backdrop-filter: blur(12px); border-radius: var(--radius-xl); box-shadow: var(--shadow-heavy); }
 
