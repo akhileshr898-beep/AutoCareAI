@@ -3,7 +3,7 @@
     --panel: rgba(12, 22, 42, 0.88);
     --panel-2: rgba(15, 30, 52, 0.92);
     --text: #f8fafc;
-    --muted: #94a3b8;
+    --muted: #e2e8f0;
     --border: rgba(148, 163, 184, 0.14);
     --cyan: #22d3ee;
     --blue: #3b82f6;
@@ -244,7 +244,7 @@ body {
 
 
 .profile-name {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
 }
 
@@ -282,7 +282,7 @@ body {
 
     .profile-dropdown-header small {
         color: var(--muted);
-        font-size: 10px;
+        font-size: 13px;
     }
 
 
@@ -347,7 +347,7 @@ body {
     border-radius: 50%;
     background: linear-gradient( 135deg, #f43f5e, #ef4444 );
     color: white;
-    font-size: 9px;
+    font-size: 12px;
     border: 2px solid #07111f;
     animation: notificationPulse 1.8s infinite;
 }
@@ -398,7 +398,7 @@ body {
 
     .notification-dropdown-header small {
         color: var(--muted);
-        font-size: 10px;
+        font-size: 13px;
     }
 
 
@@ -473,13 +473,13 @@ body {
 
 
 .notification-item strong {
-    font-size: 11px;
+    font-size: 13px;
 }
 
 
 .notification-item small {
     color: var(--muted);
-    font-size: 9px;
+    font-size: 12px;
 }
 
 
@@ -498,7 +498,7 @@ body {
 
 .section-label {
     color: var(--cyan);
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.15em;
 }
@@ -623,7 +623,7 @@ body {
 
 .summary-content span {
     color: var(--muted);
-    font-size: 9px;
+    font-size: 12px;
     text-transform: uppercase;
 }
 
@@ -637,8 +637,8 @@ body {
 
 
 .summary-content small {
-    color: #64748b;
-    font-size: 9px;
+    color: #cbd5e1;
+    font-size: 12px;
 }
 
 
@@ -685,7 +685,7 @@ body {
     .section-heading p {
         margin: 0;
         color: var(--muted);
-        font-size: 10px;
+        font-size: 13px;
     }
 
 
@@ -695,7 +695,7 @@ body {
     border-radius: 999px;
     color: #a5f3fc;
     background: rgba(34, 211, 238, 0.07);
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 800;
 }
 
@@ -911,7 +911,7 @@ body {
     .vehicle-title-row p {
         margin: 4px 0 0;
         color: var(--muted);
-        font-size: 10px;
+        font-size: 13px;
     }
 
 
@@ -998,7 +998,7 @@ body {
 
 
     .vehicle-stat span {
-        color: #64748b;
+        color: #cbd5e1;
         font-size: 7px;
         text-transform: uppercase;
     }
@@ -1007,7 +1007,7 @@ body {
     .vehicle-stat strong {
         margin-top: 2px;
         color: #e2e8f0;
-        font-size: 9px;
+        font-size: 12px;
     }
 
 
@@ -1042,7 +1042,7 @@ body {
 
     .service-progress-heading span {
         color: #bae6fd;
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 800;
     }
 
@@ -1081,7 +1081,7 @@ body {
 
 
 .service-progress-box small {
-    color: #64748b;
+    color: #cbd5e1;
     font-size: 8px;
 }
 
@@ -1115,7 +1115,7 @@ body {
     border-radius: 12px;
     color: #fda4af;
     background: rgba(239, 68, 68, 0.06);
-    font-size: 9px;
+    font-size: 12px;
 }
 
 
@@ -1127,7 +1127,7 @@ body {
     border-radius: 12px;
     color: #bae6fd;
     background: rgba(34, 211, 238, 0.05);
-    font-size: 9px;
+    font-size: 12px;
 }
 
 
@@ -1155,7 +1155,7 @@ body {
     text-decoration: none;
     background: linear-gradient( 135deg, var(--cyan), var(--blue), var(--indigo) );
     box-shadow: 0 10px 24px rgba(59, 130, 246, 0.25);
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 800;
     transition: 0.2s;
 }
@@ -1320,7 +1320,7 @@ a:nth-of-type(7) {
 
 
     .ai-message strong {
-        font-size: 9px;
+        font-size: 12px;
     }
 
 
@@ -1372,7 +1372,7 @@ a:nth-of-type(7) {
 
     .ai-question p {
         margin: 4px 0;
-        font-size: 9px;
+        font-size: 12px;
     }
 
 
@@ -1405,7 +1405,7 @@ a:nth-of-type(7) {
 
 
 .sidebar-heading span {
-    color: #64748b;
+    color: #cbd5e1;
     font-size: 7px;
     font-weight: 800;
 }
@@ -1482,13 +1482,13 @@ a:nth-of-type(7) {
 
 
 .quick-action-list strong {
-    font-size: 9px;
+    font-size: 12px;
 }
 
 
 .quick-action-list small {
     margin-top: 2px;
-    color: #64748b;
+    color: #cbd5e1;
     font-size: 7px;
 }
 
@@ -1554,7 +1554,7 @@ a:nth-of-type(7) {
 .empty-garage p {
     max-width: 500px;
     color: var(--muted);
-    font-size: 10px;
+    font-size: 13px;
 }
 
 
@@ -1564,7 +1564,7 @@ a:nth-of-type(7) {
     background: linear-gradient( 135deg, var(--cyan), var(--blue), var(--purple) );
     color: white;
     text-decoration: none;
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 800;
 }
 

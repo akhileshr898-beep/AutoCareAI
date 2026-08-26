@@ -4,11 +4,11 @@
     --surface: #12131A;
     --surface-elevated: #171922;
     --surface-glass: rgba(18, 19, 26, 0.84);
-    --text: #F5F7FA;
-    --text-soft: #D6DCE5;
-    --muted: #9CA8B8;
-    --muted-dark: #6F7B8B;
-    --primary: #7C5CFC;
+    --text: #FFFFFF;
+    --text-soft: #F1F5F9;
+    --muted: #CBD5E1;
+    --muted-dark: #94A3B8;
+    --primary: #8B5CF6;
     --primary-light: #A78BFA;
     --cyan: #C4B5FD;
     --green: #45D483;
@@ -2514,3 +2514,30 @@ section[id] {
         padding: 22px;
     }
 }
+
+/* UX Improvements */
+.text-muted { color: var(--muted) !important; font-size: 0.95rem; }
+.small, small { font-size: 0.9rem; }
+
+
+.primary-cta, .btn-primary { background-color: var(--primary) !important; color: white !important; font-weight: bold; font-size: 1.1rem; padding: 12px 24px; border-radius: var(--radius-md); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); border: none; transition: all 0.3s ease; }
+.primary-cta:hover, .btn-primary:hover { background-color: var(--primary-light) !important; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
+
+
+/* Make action links stand out */
+a { color: var(--primary-light); text-decoration: none; font-weight: 500; transition: color 0.2s ease; }
+a:hover { color: #C4B5FD; text-decoration: underline; }
+.text-muted a { color: var(--primary-light); }
+
+
+/* Form inputs and labels */
+.form-label { font-weight: 600; color: var(--text-soft); font-size: 1rem; }
+.form-control { background-color: var(--surface-elevated); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: var(--radius-sm); }
+.form-control:focus { background-color: var(--surface); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); color: var(--text); }
+
+
+/* Auth Card Layout */
+.auth-card { background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border); padding: 2.5rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-heavy); width: 100%; max-width: 440px; margin: auto; }
+.auth-logo { font-size: 3rem; margin-bottom: 1rem; }
+.auth-body { background: radial-gradient(circle at top, var(--surface-elevated), var(--bg)); }
+

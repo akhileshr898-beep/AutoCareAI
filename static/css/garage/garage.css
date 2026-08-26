@@ -4,7 +4,7 @@
     --surface-light: rgba(25, 44, 70, 0.72);
     --border: rgba(148, 163, 184, 0.16);
     --text: #f8fafc;
-    --muted: #94a3b8;
+    --muted: #e2e8f0;
     --blue: #3b82f6;
     --cyan: #22d3ee;
     --green: #34d399;
@@ -75,7 +75,7 @@ body {
 .garage-label,
 .section-title span {
     color: var(--cyan);
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 2px;
 }
@@ -249,8 +249,8 @@ body {
     right: 20px;
     bottom: 12px;
     margin: 0;
-    color: #64748b;
-    font-size: 10px;
+    color: #cbd5e1;
+    font-size: 13px;
 }
 
 .health-card {
@@ -437,7 +437,7 @@ body {
         left: 5px;
         width: 2px;
         content: "";
-        background: rgba(96, 165, 250, 0.22);
+        background: var(--border-strong);
     }
 
 .timeline-item {
@@ -530,8 +530,8 @@ body {
 
     .quick-actions small {
         margin-top: 4px;
-        color: #64748b;
-        font-size: 9px;
+        color: #cbd5e1;
+        font-size: 12px;
     }
 
 .ai-question-card {
@@ -557,7 +557,7 @@ body {
 .ai-question-card p {
     margin: 3px 0 0;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 13px;
 }
 
 .ai-question-card button {
@@ -590,7 +590,7 @@ body {
         }
 
     .floating-status {
-        font-size: 9px;
+        font-size: 12px;
     }
 
     .status-engine {
@@ -642,7 +642,7 @@ body {
     border-radius: 999px;
     background: rgba(3, 20, 38, 0.84);
     box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.06), 0 8px 24px rgba(0, 0, 0, 0.32);
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 800;
     pointer-events: auto;
     backdrop-filter: blur(12px);
@@ -805,14 +805,14 @@ body {
     .component-health-ring small {
         margin-top: -28px;
         margin-left: 28px;
-        color: #94a3b8;
+        color: #e2e8f0;
     }
 
 .component-status {
     display: inline-flex;
     padding: 5px 9px;
     border-radius: 999px;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 800;
 }
 
@@ -833,7 +833,7 @@ body {
 
 .component-modal-score p {
     margin: 9px 0 0;
-    color: #94a3b8;
+    color: #e2e8f0;
     font-size: 12px;
     line-height: 1.55;
 }
@@ -857,8 +857,8 @@ body {
     }
 
     .component-detail-grid span {
-        color: #94a3b8;
-        font-size: 9px;
+        color: #e2e8f0;
+        font-size: 12px;
     }
 
     .component-detail-grid strong {
@@ -868,8 +868,8 @@ body {
 
 .component-record-date {
     margin: 16px 0 0;
-    color: #94a3b8;
-    font-size: 10px;
+    color: #e2e8f0;
+    font-size: 13px;
 }
 
 .component-disclaimer {
@@ -877,11 +877,11 @@ body {
     gap: 9px;
     margin-top: 16px;
     padding: 13px;
-    color: #94a3b8;
+    color: #e2e8f0;
     border: 1px solid rgba(56, 189, 248, 0.16);
     border-radius: 13px;
     background: rgba(14, 165, 233, 0.07);
-    font-size: 10px;
+    font-size: 13px;
     line-height: 1.5;
 }
 
