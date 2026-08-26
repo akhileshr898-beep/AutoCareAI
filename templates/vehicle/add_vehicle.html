@@ -19,11 +19,6 @@
           href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
-        body {
-            min-height: 100vh;
-            background: radial-gradient(circle at 10% 10%, #dbeafe, transparent 35%), #f8fafc;
-        }
-
         .vehicle-form-card {
             max-width: 900px;
             margin: auto;
@@ -33,14 +28,14 @@
 
         .catalogue-panel {
             padding: 20px;
-            border: 1px solid #bfdbfe;
+            border: 1px solid var(--border);
             border-radius: 18px;
-            background: #eff6ff;
+            background: var(--surface-glass);
         }
 
         .catalogue-status {
             min-height: 24px;
-            color: #64748b;
+            color: var(--text-soft);
             font-size: 13px;
         }
 
@@ -48,9 +43,9 @@
             display: none;
             margin-top: 18px;
             padding: 18px;
-            border: 1px solid #bbf7d0;
+            border: 1px solid var(--primary);
             border-radius: 16px;
-            background: #f0fdf4;
+            background: var(--surface-elevated);
         }
 
             .selected-vehicle-card.show {
@@ -63,9 +58,9 @@
             display: grid;
             place-items: center;
             flex: 0 0 auto;
-            color: #047857;
+            color: var(--primary);
             border-radius: 14px;
-            background: #d1fae5;
+            background: rgba(139, 92, 246, 0.15);
             font-size: 22px;
         }
 
@@ -73,9 +68,9 @@
             display: none;
             margin-top: 18px;
             padding: 18px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 16px;
-            background: #ffffff;
+            background: var(--surface);
         }
 
             .manual-entry-panel.show {
@@ -88,7 +83,7 @@
         }
 
         .required-note {
-            color: #64748b;
+            color: var(--text-soft);
             font-size: 12px;
         }
 
