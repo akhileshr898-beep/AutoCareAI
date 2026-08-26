@@ -910,3 +910,11 @@ body {
         align-items: flex-start;
     }
 }py
+
+/* 3D Model Loading Screen */
+.custom-progress-bar { position: absolute; inset: 0; background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s; }
+.custom-progress-bar.hide { opacity: 0; pointer-events: none; }
+.update-bar { width: 40%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+.update-bar::after { content: ''; display: block; height: 100%; background: var(--primary); width: 0; animation: loading-bar 2s infinite ease-in-out; }
+@keyframes loading-bar { 0% { width: 0%; margin-left: 0; } 50% { width: 100%; margin-left: 0; } 100% { width: 0%; margin-left: 100%; } }
+
