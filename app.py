@@ -424,6 +424,7 @@ def home():
     "/health"
 )
 @csrf.exempt
+@limiter.exempt
 def health_check():
 
     return jsonify(
