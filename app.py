@@ -27,6 +27,8 @@ from extensions import (
     login_manager,
     migrate,
     csrf,
+    limiter,
+    mail,
 )
 
 from routes import (
@@ -232,7 +234,6 @@ migrate.init_app(
     db,
 )
 
-from extensions import limiter
 limiter.init_app(app)
 
 csrf.init_app(
@@ -255,11 +256,7 @@ app.config["MAIL_DEFAULT_SENDER"] = (
     os.environ.get("MAIL_FROM", os.environ.get("MAIL_USERNAME", "")),
 )
 app.config["MAIL_TIMEOUT"]  = 30
-app.config["MAIL_SUPPRESS_SEND"] = not bool(
-    os.environ.get("MAIL_PASSWORD", "").strip()
-)
 
-from extensions import mail
 mail.init_app(app)
 
 
