@@ -1,4 +1,5 @@
 import os
+import traceback
 from datetime import datetime, timezone
 from urllib.parse import quote_plus
 
@@ -197,17 +198,17 @@ app.config[
 
 
 # ============================================================
-# PRODUCTION CONFIGURATION
+# PRODUCTION & REVERSE PROXY CONFIGURATION (RENDER COMPATIBLE)
 # ============================================================
 
-if os.environ.get(
-    "FLASK_ENV"
-) == "production":
+is_production = (
+    os.environ.get("FLASK_ENV") == "production"
+    or os.environ.get("RENDER") is not None
+    or os.environ.get("DATABASE_URL") is not None
+)
 
-    app.config[
-        "SESSION_COOKIE_SECURE"
-    ] = True
-
+if is_production:
+    app.config["SESSION_COOKIE_SECURE"] = True
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,
@@ -215,6 +216,9 @@ if os.environ.get(
         x_host=1,
         x_prefix=1,
     )
+
+# Disable strict SSL check for CSRF to prevent false mismatches behind Render's proxy
+app.config["WTF_CSRF_SSL_STRICT"] = False
 
 
 # ============================================================
@@ -344,66 +348,48 @@ app.register_blueprint(
 # ERROR HANDLERS
 # ============================================================
 
-@app.errorhandler(
-    400
-)
-def bad_request_error(
-    error
-):
-
-    return render_template(
-        "errors/400.html"
-    ), 400
+@app.errorhandler(400)
+def bad_request_error(error):
+    app.logger.warning(f"400 Bad Request: {error}")
+    try:
+        return render_template("errors/400.html", error=error), 400
+    except Exception:
+        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>400 Bad Request</h2><p>Session or security token expired. <a href='/login' style='color:#60a5fa;'>Click here to log in again</a>.</p></div>", 400
 
 
-@app.errorhandler(
-    403
-)
-def forbidden_error(
-    error
-):
-
-    return render_template(
-        "errors/403.html"
-    ), 403
+@app.errorhandler(403)
+def forbidden_error(error):
+    try:
+        return render_template("errors/403.html"), 403
+    except Exception:
+        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>403 Forbidden</h2></div>", 403
 
 
-@app.errorhandler(
-    404
-)
-def not_found_error(
-    error
-):
-
-    return render_template(
-        "errors/404.html"
-    ), 404
+@app.errorhandler(404)
+def not_found_error(error):
+    try:
+        return render_template("errors/404.html"), 404
+    except Exception:
+        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>404 Not Found</h2></div>", 404
 
 
-@app.errorhandler(
-    413
-)
-def request_entity_too_large_error(
-    error
-):
-
-    return render_template(
-        "errors/413.html"
-    ), 413
+@app.errorhandler(413)
+def request_entity_too_large_error(error):
+    try:
+        return render_template("errors/413.html"), 413
+    except Exception:
+        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>413 File Too Large</h2></div>", 413
 
 
-@app.errorhandler(
-    500
-)
-def internal_error(
-    error
-):
-
+@app.errorhandler(500)
+def internal_error(error):
     db.session.rollback()
+    app.logger.error(f"500 Internal Server Error: {error}\n{traceback.format_exc()}")
+    try:
+        return render_template("errors/500.html"), 500
+    except Exception:
+        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>500 Internal Server Error</h2><p>Something went wrong on our end.</p></div>", 500
 
-    return render_template(
-        "errors/500.html"
-    ), 500
 
 
 # ============================================================
