@@ -241,6 +241,29 @@ csrf.init_app(
 
 
 # ============================================================
+# MAIL CONFIGURATION (Flask-Mail via Gmail SMTP)
+# ============================================================
+
+app.config["MAIL_SERVER"]   = "smtp.gmail.com"
+app.config["MAIL_PORT"]     = 587
+app.config["MAIL_USE_TLS"]  = True
+app.config["MAIL_USE_SSL"]  = False
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME", "")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD", "")
+app.config["MAIL_DEFAULT_SENDER"] = (
+    "AutoCare AI",
+    os.environ.get("MAIL_FROM", os.environ.get("MAIL_USERNAME", "")),
+)
+app.config["MAIL_TIMEOUT"]  = 30
+app.config["MAIL_SUPPRESS_SEND"] = not bool(
+    os.environ.get("MAIL_PASSWORD", "").strip()
+)
+
+from extensions import mail
+mail.init_app(app)
+
+
+# ============================================================
 # LOGIN MANAGER CONFIGURATION
 # ============================================================
 
