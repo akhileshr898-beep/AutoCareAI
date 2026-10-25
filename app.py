@@ -1,7 +1,8 @@
 import os
+import socket
 import traceback
 from datetime import datetime, timezone
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse, urlunparse
 
 from dotenv import load_dotenv
 
@@ -68,67 +69,70 @@ app.config["SECRET_KEY"] = os.environ.get(
 # DATABASE CONFIGURATION
 # ============================================================
 
-db_url = os.environ.get(
-    "DATABASE_URL"
-)
-
-
-# ------------------------------------------------------------
-# LOCAL MYSQL FALLBACK
-# ------------------------------------------------------------
-
-if not db_url:
-
-    mysql_user = os.environ.get(
-        "MYSQL_USER",
-        "root",
-    )
-
-    mysql_password = quote_plus(
-        os.environ.get(
-            "MYSQL_PASSWORD",
-            "akhi@123",
+def configure_db_url(raw_url):
+    if not raw_url:
+        mysql_user = os.environ.get("MYSQL_USER", "root")
+        mysql_password = quote_plus(os.environ.get("MYSQL_PASSWORD", "akhi@123"))
+        mysql_host = os.environ.get("MYSQL_HOST", "localhost")
+        mysql_port = os.environ.get("MYSQL_PORT", "3306")
+        mysql_database = os.environ.get("MYSQL_DATABASE", "autocare_ai")
+        return (
+            f"mysql+pymysql://"
+            f"{mysql_user}:"
+            f"{mysql_password}"
+            f"@{mysql_host}:"
+            f"{mysql_port}/"
+            f"{mysql_database}"
         )
-    )
 
-    mysql_host = os.environ.get(
-        "MYSQL_HOST",
-        "localhost",
-    )
+    url = raw_url.strip()
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
-    mysql_port = os.environ.get(
-        "MYSQL_PORT",
-        "3306",
-    )
+    # Render internal DNS fix: resolve dpg-xxxx-a to the region-specific public domain
+    try:
+        parsed = urlparse(url)
+        host = parsed.hostname
+        if host and host.startswith("dpg-") and ".render.com" not in host:
+            try:
+                socket.gethostbyname(host)
+            except (socket.gaierror, socket.herror):
+                for region in ["oregon", "frankfurt", "singapore", "ohio", "virginia"]:
+                    candidate = f"{host}.{region}-postgres.render.com"
+                    try:
+                        socket.gethostbyname(candidate)
+                        netloc = parsed.netloc.replace(host, candidate)
+                        url = urlunparse(parsed._replace(netloc=netloc))
+                        if "sslmode" not in url:
+                            url += "?sslmode=require" if "?" not in url else "&sslmode=require"
+                        print(f"Render DB host resolved to: {candidate}")
+                        break
+                    except (socket.gaierror, socket.herror):
+                        continue
+    except Exception as e:
+        print(f"Error parsing database URL: {e}")
 
-    mysql_database = os.environ.get(
-        "MYSQL_DATABASE",
-        "autocare_ai",
-    )
+    # Validate remote connection or gracefully fall back to local SQLite
+    if url.startswith("postgresql"):
+        from sqlalchemy import create_engine, text
+        try:
+            test_engine = create_engine(url, connect_args={"connect_timeout": 5})
+            with test_engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            test_engine.dispose()
+            print("Successfully connected to PostgreSQL database.")
+        except Exception as conn_err:
+            print(f"WARNING: PostgreSQL connection failed ({conn_err}).")
+            fallback_path = os.path.join(app.root_path, "autocare.db")
+            print(f"Falling back to local SQLite database: {fallback_path}")
+            return f"sqlite:///{fallback_path}"
 
-    db_url = (
-        f"mysql+pymysql://"
-        f"{mysql_user}:"
-        f"{mysql_password}"
-        f"@{mysql_host}:"
-        f"{mysql_port}/"
-        f"{mysql_database}"
-    )
+    return url
 
+db_url = configure_db_url(os.environ.get("DATABASE_URL"))
 
-# ------------------------------------------------------------
-# RENDER / POSTGRES COMPATIBILITY
-# Force psycopg2 dialect — Render provides psycopg2-binary.
-# New SQLAlchemy defaults to psycopg (v3) which is NOT installed.
-# ------------------------------------------------------------
-
-elif db_url.startswith("postgres://"):
-    # Old Render format → postgresql+psycopg2://
-    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
-
-elif db_url.startswith("postgresql://"):
-    # New Render format but without explicit driver → force psycopg2
-    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 
 app.config[
@@ -384,15 +388,12 @@ def request_entity_too_large_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    tb = traceback.format_exc()
-    app.logger.error(f"500 Internal Server Error: {error}\n{tb}")
-    return f"""
-    <div style="background:#111;color:#ff6b6b;padding:30px;font-family:monospace;">
-        <h2>500 Internal Server Error</h2>
-        <p><strong>Error:</strong> {error}</p>
-        <pre style="background:#222;color:#eee;padding:15px;border-radius:8px;overflow:auto;">{tb}</pre>
-    </div>
-    """, 500
+    app.logger.error(f"500 Internal Server Error: {error}\n{traceback.format_exc()}")
+    try:
+        return render_template("errors/500.html"), 500
+    except Exception:
+        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>500 Internal Server Error</h2><p>Something went wrong on our end.</p></div>", 500
+
 
 
 
