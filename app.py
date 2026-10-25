@@ -384,11 +384,16 @@ def request_entity_too_large_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    app.logger.error(f"500 Internal Server Error: {error}\n{traceback.format_exc()}")
-    try:
-        return render_template("errors/500.html"), 500
-    except Exception:
-        return "<div style='color:white;background:#1e1e1e;padding:40px;text-align:center;'><h2>500 Internal Server Error</h2><p>Something went wrong on our end.</p></div>", 500
+    tb = traceback.format_exc()
+    app.logger.error(f"500 Internal Server Error: {error}\n{tb}")
+    return f"""
+    <div style="background:#111;color:#ff6b6b;padding:30px;font-family:monospace;">
+        <h2>500 Internal Server Error</h2>
+        <p><strong>Error:</strong> {error}</p>
+        <pre style="background:#222;color:#eee;padding:15px;border-radius:8px;overflow:auto;">{tb}</pre>
+    </div>
+    """, 500
+
 
 
 
