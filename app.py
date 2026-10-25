@@ -115,17 +115,17 @@ if not db_url:
 
 # ------------------------------------------------------------
 # RENDER / POSTGRES COMPATIBILITY
+# Force psycopg2 dialect — Render provides psycopg2-binary.
+# New SQLAlchemy defaults to psycopg (v3) which is NOT installed.
 # ------------------------------------------------------------
 
-elif db_url.startswith(
-    "postgres://"
-):
+elif db_url.startswith("postgres://"):
+    # Old Render format → postgresql+psycopg2://
+    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
 
-    db_url = db_url.replace(
-        "postgres://",
-        "postgresql://",
-        1,
-    )
+elif db_url.startswith("postgresql://"):
+    # New Render format but without explicit driver → force psycopg2
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 
 app.config[
